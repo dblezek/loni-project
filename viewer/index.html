@@ -1,0 +1,312 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<!-- 
+
+/*                    
+ *    The X Toolkit (XTK) is licensed under the MIT License:
+ *      http://www.opensource.org/licenses/mit-license.php
+ *
+ * CREDITS: https://raw.github.com/xtk/X/master/LICENSE
+ *
+ * Thanks to Twitter Bootstrap and JQuery!!
+ *
+ */
+
+ -->
+<html>
+<head>
+<title>Image Viewer</title>
+<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
+
+<meta name='viewport' content='width=device-width, initial-scale=1.0' />
+
+<link href='css/bootstrap.css' rel='stylesheet' />
+<link href='css/bootstrap-responsive.css' rel='stylesheet' />
+<link type='text/css' rel='stylesheet' href='css/xtheme/jquery.ui.css' />
+<link type='text/css' rel='stylesheet' href='css/jquery.miniColors.css' />
+<link type='text/css' rel='stylesheet' href='css/jquery.sidebar.css' />
+<link type='text/css' rel='stylesheet' href='css/frontpage.css' />
+<link type='text/css' rel='stylesheet' href='css/viewer.css' />
+
+<script type='text/javascript' src='js/jquery.js'></script>
+<script type='text/javascript' src='js/jquery.ui.js'></script>
+<script type='text/javascript' src='js/jquery.ui.slider.js'></script>
+<script type='text/javascript' src='js/jquery.miniColors.js'></script>
+<script type='text/javascript' src='js/jquery.filestyle.js'></script>
+<script type='text/javascript' src='js/jquery.idTabs.js'></script>
+<script type='text/javascript' src='js/jquery.sidebar.js'></script>
+<script type='text/javascript' src='js/jquery.sidebar.volume.js'></script>
+<script type='text/javascript' src='js/jquery.sidebar.mesh.js'></script>
+<script type='text/javascript' src='js/jquery.sidebar.fibers.js'></script>
+<script type='text/javascript' src='js/jquery.viewer.js'></script>
+<script type='text/javascript' src='js/jquery.frontpage.js'></script>
+<script type='text/javascript' src='js/bootstrap-modal.js'></script>
+<script type='text/javascript' src='js/x.controller.js'></script>
+<script type='text/javascript' src='js/x.examples.js'></script>
+<script type='text/javascript' src='js/x.rendering.js'></script>
+<script type='text/javascript' src='js/xtk.js'></script>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-15474885-10']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+</head>
+<body id='body'>
+
+	<!-- The frontpage -->
+	<div id='frontpage' style=''>
+
+		<div id='content' class='container' style=''>
+
+
+			<div id='pagetitle' class='hero-unit'>
+				<h2>Image Viewer</h2>
+				<p>Instantly view scientific and medical imaging data in 3D using <a href="https://github.com/xtk/X#readme">XTK</a>.</p>
+			</div>
+
+			<div class='well examples'>
+				<h3>Try the examples..</h3>
+				<img id='egvolImage' src='gfx/vol_small.png' class='selectexample' style='cursor:pointer;' /> 
+				<img id='eglabelmapImage' src='gfx/labelmap_small.png' style='cursor:pointer;'/> 
+				<img id='egshapeImage' src='gfx/shape_small.png' style='cursor:pointer;'/> 
+				<img id='egfibersImage' src='gfx/fibers_small.png' style='cursor:pointer;'/> 
+					
+				<div id='egvol'>
+					Single volume. <b>Loading time: *</b><span
+						class='label label-info viewexample' id='egvollink'>View
+						Example</span>
+				</div>
+				<div id='eglabelmap' style='display: none'>
+					Volume and a colored label map. <b>Loading time: **</b> <span
+						class='label label-info viewexample' id='labelmaplink'>View
+						Example</span>
+				</div>
+				<div id='egshape' style='display: none'>
+					56 shape files for 56 ROIs. <b>Loading time: **</b><span
+						class='label label-info viewexample' id='egshapelink'>View
+						Example</span>
+				</div>
+				<div id='egfibers' style='display: none'>
+					Volume, a colored label map and a TrackVis file (fiber tracks).
+					<br><b>Loading time: ***</b><span class='label label-info viewexample'
+						id='egfiberslink'>View Example</span>
+				</div>
+			</div>
+
+			<div class='dropzone'>
+				<span>Drop files here or </span><input id='filebutton' type='file'
+					multiple onchange='selectfiles(this.files)' style='display: none;'></input><a
+					class='btn btn-inverse btn-large' style='vertical-align: super;'
+					onclick='javascript:document.getElementById("filebutton").click();'>Select
+					files</a> <br /> <br />
+				<p>Supported files:</p>
+				<p>Volumes (.nii / .nii.gz / .img&.hdr / .mgh / .mgz / .nrrd)</p>
+				<p>Shapes (.dx / .vtk / .stl / FreeSurfer)</p>
+				<p>Fibers (.trk)</p>
+			</div>
+
+			<div class='footer'>
+				<div class='row' style='margin: auto'>
+				</div>
+				<div id='footnote' style='margin-left:30px'>Supported browsers: Chrome 16+, Firefox 8+.<br />
+				Based on <a href='https://github.com/slicedrop/slicedrop.github.com' target='_blank'>slicedrop</a>. Source code <a href='viewer.tar.gz'>here</a>.</div>
+			</div>
+			
+		</div>
+		<!-- /container -->
+
+	</div>
+
+	<!-- Drop note -->
+	<div id='drop-box-overlay'>
+		<h1>Drop files anywhere...</h1>
+	</div>
+	
+
+	<!-- The viewer -->
+	<div id='viewer' style='display: none;'>
+
+		<ul class='navigation'>
+			<li id='volume' class='navigationLi'><div class='menu'>
+					<div class='pin'>
+						<span class='ui-icon ui-icon-pin-s pinicon'></span>
+					</div>
+
+					<div class='tabbox idTabs' id='volumetabs'>
+						<div class='caption'>VOLUME</div>
+
+						<a href='#volumeTab' class='selected'>Volume</a> <a
+							href='#labelmapTab' id='labelmapSwitch'
+							style='margin-left: 50px;'>Labelmap</a>
+						<div id='volumeTab' class='tabContent'>
+
+
+							<div id='modes' style='width: 130px; float: left;'>
+								<div id='volumerendering'>
+									<img src='gfx/3d.png' />
+								</div>
+								<div id='slicing'>
+									<img src='gfx/2d.png' />
+								</div>
+							</div>
+
+							<div id='colors'
+								style='width: 26px; margin-left: 6px; float: left;'>
+
+								<input id='fgColorVolume' type='hidden'
+									class='color-picker black' size='6' value='#ffffff' /> <input
+									id='bgColorVolume' type='hidden' class='color-picker black'
+									size='6' value='#000000' />
+							</div>
+
+							<div id='opacity-label' class='menuLabel'
+								style='margin-top: 4px; float: left;'>3D Opacity</div>
+							<div id='opacity-volume'
+								style='margin-left: 10px; margin-top: 4px; float: left;'></div>
+
+							<div id='windowlevel-label' class='menuLabel'
+								style='margin-top: 4px; float: left;'>Window/Level</div>
+							<div id='windowlevel-volume'
+								style='margin-left: 10px; margin-top: 4px; float: left;'></div>
+
+							<div class='menuLabel' style='margin-top: 4px; float: left;'>Threshold</div>
+							<div id='threshold-volume'
+								style='margin-left: 10px; margin-top: 4px; float: left;'></div>
+						    
+						    <div style='margin-right: 19px; margin-top: 4px; float: right;'><button id="saveFileButton" type="button" onclick="saveFile()">Save...</button></div>
+							<div style='margin-right: 19px; margin-top: 4px; float: right;'><span id="saveFileInfo"></span></div>
+
+
+						</div>
+						<div id='labelmapTab' class='tabContent' style='display: none'>
+
+
+							<div id='visibility-labelmap' style='width: 130px; float: left;'>
+								<div class='menuLabel' style='margin-top: 4px; float: left;'>Show/Hide</div>
+								<div id='labelmapvisibility' class='eye show-icon'
+									style='margin-left: 6px;'></div>
+							</div>
+
+							<div class='menuLabel' style='margin-top: 4px; float: left;'>Labelmap
+								Opacity</div>
+							<div id='opacity-labelmap'
+								style='margin-left: 10px; margin-top: 4px; float: left;'></div>
+
+
+						</div>
+					</div>
+
+				</div></li>
+
+			<li id='mesh' class='navigationLi'><div class='menu'>
+					<div class='pin'>
+						<span class='ui-icon ui-icon-pin-s pinicon'></span>
+					</div>
+					<div class='tabbox idTabs' style="height:260px">
+						<div class='caption'>MESH</div>
+
+						<a class='meshtabs selected'>Mesh 1</a>
+						<div id='mesh1' class='tabContent'>
+
+							<div id='visibility-mesh'
+								style='width: 140px; float: left; margin-top: 2px;'>
+								<div class='menuLabel' style='margin-top: 4px; float: left;'>Show/Hide</div>
+								<div id='meshvisibility' class='eye show-icon'
+									style='margin-left: 6px;'></div>
+							</div>
+
+							<input type='hidden' id='meshColor' class='color-picker black'
+								size='6' value='#0000ff' />
+
+							<div class='menuLabel' style='margin-top: 4px; float: left;'>Opacity</div>
+							<div id='opacity-mesh'
+								style='margin-left: 10px; margin-top: 4px; float: left;'></div>
+
+							<div class='menuLabel'
+								style='margin-top: 4px; float: left; margin-top: 10px;'>Scalars</div>
+							<div id='scalars-mesh' style='width: 160px; float: left;'>
+
+								<select id='scalars-selector' style='margin-left: 6px'><option>Scalars
+										1</option></select> <input type='hidden' class='color-picker black'
+									id='scalarsMinColor' size='6' value='#00ff00' /> <input
+									type='hidden' id='scalarsMaxColor' class='color-picker black'
+									size='6' value='#ff0000' />
+							</div>
+
+							<div class='menuLabel' style='margin-top: 4px; float: left;'>Scalars
+								Threshold</div>
+							<div id='threshold-scalars'
+								style='margin-left: 10px; margin-top: 4px; float: left;'></div>
+
+						</div>
+
+					</div>
+				</div></li>
+
+			<li id='fibers' class='navigationLi'><div class='menu'>
+					<div class='pin'>
+						<span class='ui-icon ui-icon-pin-s pinicon'></span>
+					</div>
+					<div class='tabbox idTabs'>
+						<div class='caption'>FIBERS</div>
+
+						<a class='fiberstabs selected'>Fibers 1</a>
+
+						<div id='fibers1' class='tabContent'>
+
+							<div id='visibility-fibers'
+								style='width: 140px; float: left; margin-top: 2px;'>
+								<div class='menuLabel' style='margin-top: 4px; float: left;'>Show/Hide</div>
+								<div id='fibersvisibility' class='eye show-icon'
+									style='margin-left: 6px;'></div>
+							</div>
+
+							<div class='menuLabel' style='margin-top: 4px; float: left;'>Fiber
+								Length Threshold</div>
+							<div id='threshold-fibers'
+								style='margin-left: 10px; margin-top: 4px; float: left;'></div>
+
+
+						</div>
+
+					</div>
+				</div></li>
+
+		</ul>
+
+
+
+		<!--  The renderers. -->
+
+		<div id='3d' class='threeDRenderer'></div>
+		<div id='sliceX' class='twoDRenderer' style='top: 0%;'>
+			<div id='yellow_slider'></div>
+		</div>
+		<div id='sliceY' class='twoDRenderer' style='top: 33.333%;'>
+			<div id='red_slider'></div>
+		</div>
+		<div id='sliceZ' class='twoDRenderer' style='top: 66.666%;'>
+			<div id='green_slider'></div>
+		</div>
+
+		<div id='blacklogo'>
+			<a href=''><img src='gfx/back.png' /></a>
+		</div>
+
+	</div>
+	
+	<div id="browser-dialog" style='display: none;' title="Incompatible Browser">
+	<p>This website uses WebGL to render 3D images. Currently only Chrome and Firefox browsers are supported. Using other browsers may slow down or crash your operating system.</p>
+	</div>
+
+</body>
+</html>
