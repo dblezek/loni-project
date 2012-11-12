@@ -349,7 +349,7 @@ X.interactor.prototype.init = function() {
   // mouse movement outside the element
   this._mouseOutListener = goog.events.listen(this._element,
       goog.events.EventType.MOUSEOUT, this.onMouseMovementOutside_.bind(this));
-  
+      
 };
 
 
@@ -428,6 +428,17 @@ X.interactor.prototype.onMouseUp_ = function(event) {
     // right button click
     this._rightButtonDown = false;
     
+  }
+  
+  if (this instanceof X.interactor2D) { 
+  	
+  	// create a new paint event
+  	var e = new X.event.PaintEvent();
+  	
+    e._x = event.offsetX;
+    e._y = event.offsetY;
+    
+	this.dispatchEvent(e);
   }
   
   eval("this.onMouseUp(" + this._leftButtonDown + "," + this._middleButtonDown +
@@ -607,7 +618,7 @@ X.interactor.prototype.onMouseMovementInside_ = function(event) {
     
   }
   
-
+  
   //
   // check which mouse buttons or keys are pressed
   //
@@ -745,6 +756,24 @@ X.interactor.prototype.onMouseWheel_ = function(event) {
 X.interactor.prototype.onKey = function(event) {
 
   // do nothing
+  
+};
+
+
+/**
+ * Overload this function to execute code on keyboard events.
+ * 
+ * @param {Event} event The browser fired keyboard event.
+ */
+X.interactor.prototype.rotate = function(x, y) {
+
+  
+	// create a new rotate event
+	var e = new X.event.RotateEvent();
+
+    // attach the distance vector
+    e._distance = [x, y];
+   	this.dispatchEvent(e);
   
 };
 
@@ -897,3 +926,4 @@ goog.exportSymbol('X.interactor.prototype.onMouseMove',
 goog.exportSymbol('X.interactor.prototype.onMouseWheel',
     X.interactor.prototype.onMouseWheel);
 goog.exportSymbol('X.interactor.prototype.onKey', X.interactor.prototype.onKey);
+goog.exportSymbol('X.interactor.prototype.rotate', X.interactor.prototype.rotate);

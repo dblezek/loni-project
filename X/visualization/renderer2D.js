@@ -641,6 +641,36 @@ X.renderer2D.prototype.render_ = function(picking, invoked) {
   var _lowerThreshold = _volume._lowerThreshold;
   var _upperThreshold = _volume._upperThreshold;
   
+  // paint
+  var _paintSliceX = 0;
+  var _paintSliceY = 0;
+  if (this._paintX * this._paintY > 0) {
+  	var _sliceRatio = _sliceWidth/_sliceHeight;
+  	var _viewRatio = this._width/this._height;
+    
+  	if (_viewRatio < _sliceRatio) {
+  		// letter boxed with black regions on top and bottom
+  		var _zoomRatio = _sliceWidth / this._width;
+  		var _zoomedSliceHeight = _sliceHeight / _zoomRatio;
+  		var _margin = (this._height - _zoomedSliceHeight)/2;
+  		_paintSliceY = this._paintY - _margin;
+  		_paintSliceY = _paintSliceY * _zoomRatio;
+  		_paintSliceX = this._paintX * _zoomRatio;
+  	} else {
+  		// letter boxed with black regions on sides
+  		var _zoomRatio = _sliceHeight / this._height;
+  		var _zoomedSliceWidth = _sliceWidth / _zoomRatio;
+  		var _margin = (this._width - _zoomedSliceWidth)/2;
+  		_paintSliceX = this._paintX - _margin;
+  		_paintSliceX = _paintSliceX * _zoomRatio;
+  		_paintSliceY = this._paintY * _zoomRatio;
+  	}
+  	
+  	if (_paintSliceX * _paintSliceY > 0) {
+  		_paintSliceX = Math.floor(_paintSliceX+0.5);
+  		_paintSliceY = Math.floor(_paintSliceY+0.5);
+  	}
+  }
 
   // loop through the pixels and draw them to the invisible canvas
   // from bottom right up
@@ -692,11 +722,18 @@ X.renderer2D.prototype.render_ = function(picking, invoked) {
     
     var _invertedIndex = (_pixelsLength - 1 - _index);
     
-    _pixels[_invertedIndex - 3] = _color[0]; // r
-    _pixels[_invertedIndex - 2] = _color[1]; // g
-    _pixels[_invertedIndex - 1] = _color[2]; // b
-    _pixels[_invertedIndex] = _color[3]; // a
-    
+    if (_paintSliceX * _paintSliceY > 0 && 
+    	((_paintSliceY - 1) * _sliceWidth + _paintSliceX) == Math.ceil(_invertedIndex/4)) {
+     	_pixels[_invertedIndex - 3] = 255; // r
+    	_pixels[_invertedIndex - 2] = 255; // g
+    	_pixels[_invertedIndex - 1] = 0; // b
+    	_pixels[_invertedIndex] = 255; // a
+    } else {
+	    _pixels[_invertedIndex - 3] = _color[0]; // r
+	    _pixels[_invertedIndex - 2] = _color[1]; // g
+	    _pixels[_invertedIndex - 1] = _color[2]; // b
+	    _pixels[_invertedIndex] = _color[3]; // a
+    }
 
     _labelPixels[_invertedIndex - 3] = _label[0]; // r
     _labelPixels[_invertedIndex - 2] = _label[1]; // g

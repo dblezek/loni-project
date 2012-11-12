@@ -35,6 +35,7 @@ goog.provide('X.event.events');
 goog.provide('X.event.HoverEvent');
 goog.provide('X.event.HoverEndEvent');
 goog.provide('X.event.ModifiedEvent');
+goog.provide('X.event.PaintEvent');
 goog.provide('X.event.PanEvent');
 goog.provide('X.event.RenderEvent');
 goog.provide('X.event.ResetViewEvent');
@@ -129,7 +130,10 @@ X.event.events = {
   HOVER: X.event.uniqueId('hover'),
   
   // the hover end event
-  HOVER_END: X.event.uniqueId('hover_end')
+  HOVER_END: X.event.uniqueId('hover_end'),
+  
+  // the paint event
+  PAINT: X.event.uniqueId('paint')
 
 };
 
@@ -335,6 +339,37 @@ X.event.HoverEndEvent = function() {
 };
 // inherit from goog.events.Event
 goog.inherits(X.event.HoverEndEvent, X.event);
+
+/**
+ * The paint event, indicating mouse point on an X.object.
+ * 
+ * @constructor
+ * @extends X.event
+ */
+X.event.PaintEvent = function() {
+
+  // call the default event constructor
+  goog.base(this, X.event.events.PAINT);
+  
+  /**
+   * The x coordinate.
+   * 
+   * @type {!number}
+   * @protected
+   */
+  this._x = 0;
+  
+  /**
+   * The y coordinate.
+   * 
+   * @type {!number}
+   * @protected
+   */
+  this._y = 0;
+  
+};
+// inherit from goog.events.Event
+goog.inherits(X.event.PaintEvent, X.event);
 
 
 /**

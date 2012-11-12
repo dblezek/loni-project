@@ -578,6 +578,18 @@ X.volume.prototype.__defineSetter__('center', function(center) {
 
 
 /**
+ * Get the spacing of this volume.
+ * 
+ * @return {!Array} The spacing of the volume.
+ * @public
+ */
+X.volume.prototype.__defineGetter__('spacing', function() {
+	
+	return this._spacing;
+	
+});
+
+/**
  * Get the original image data of this volume.
  * 
  * @return {!Array} A 3D array containing the pixel (image) data.
