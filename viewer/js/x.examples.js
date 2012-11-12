@@ -11,7 +11,7 @@ function loadVol() {
   
   // now the fun part, arrrr
   volume = new X.volume();
-  volume.file = 'http://users.loni.ucla.edu/~pipeline/viewer/data/original.mgh';
+  volume.file = 'data/original.mgh';
   _data.volume.file = volume.file;
   
   ren3d.add(volume);
@@ -132,7 +132,7 @@ function loadFibers() {
   
   // it's a fibers thingie
   fibers = new X.fibers();
-  fibers.file = 'http://users.loni.ucla.edu/~pipeline/viewer/data/fibers.trk';
+  fibers.file = 'data/fibers.trk';
   fibers.transform.matrix = new X.matrix(
 	   [[1, 0, 0, -130], [0, 6.123031769111886e-17, 1, -130],
 	   [0, -1, 6.123031769111886e-17, 130], [0, 0, 0, 1]]);
@@ -141,9 +141,9 @@ function loadFibers() {
   
   // now the fun part, arrrr
   volume = new X.volume();
-  volume.file = 'http://users.loni.ucla.edu/~pipeline/viewer/data/original.mgh';
-  volume.labelmap.file = 'http://users.loni.ucla.edu/~pipeline/viewer/data/label.mgz';
-  volume.labelmap.colortable.file = 'http://users.loni.ucla.edu/~pipeline/viewer/data/colormap.txt';
+  volume.file = 'data/original.mgh';
+  volume.labelmap.file = 'data/label.mgz';
+  volume.labelmap.colortable.file = 'data/colormap.txt';
   _data.volume.file = volume.file;
   _data.labelmap.file = volume.labelmap.file;
   
@@ -183,9 +183,9 @@ function loadLabelMaps() {
   
   // now the fun part, arrrr
   volume = new X.volume();
-  volume.file = 'http://users.loni.ucla.edu/~pipeline/viewer/data/original.mgh';
-  volume.labelmap.file = 'http://users.loni.ucla.edu/~pipeline/viewer/data/label.mgz';
-  volume.labelmap.colortable.file = 'http://users.loni.ucla.edu/~pipeline/viewer/data/colormap.txt';
+  volume.file = 'data/original.mgh';
+  volume.labelmap.file = 'data/label.mgz';
+  volume.labelmap.colortable.file = 'data/colormap.txt';
   _data.volume.file = volume.file;
   _data.labelmap.file = volume.labelmap.file;
   
