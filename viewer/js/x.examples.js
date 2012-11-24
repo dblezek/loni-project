@@ -1,3 +1,10 @@
+goog.require('X.renderer3D');
+goog.require('X.renderer2D');
+goog.require('X.mesh');
+goog.require('X.matrix');
+goog.require('X.volume');
+goog.require('X.cube');
+
 // load all examples
 
 function loadVol() {

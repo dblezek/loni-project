@@ -27,6 +27,9 @@
 <link type='text/css' rel='stylesheet' href='css/frontpage.css' />
 <link type='text/css' rel='stylesheet' href='css/viewer.css' />
 
+<script type='text/javascript' src='X/lib/closure-library/closure/goog/base.js'></script>
+<script type='text/javascript' src='X/xtk-deps.js'></script>
+
 <script type='text/javascript' src='js/jquery.js'></script>
 <script type='text/javascript' src='js/jquery.ui.js'></script>
 <script type='text/javascript' src='js/jquery.ui.slider.js'></script>
@@ -43,7 +46,6 @@
 <script type='text/javascript' src='js/x.controller.js'></script>
 <script type='text/javascript' src='js/x.examples.js'></script>
 <script type='text/javascript' src='js/x.rendering.js'></script>
-<script type='text/javascript' src='js/xtk.js'></script>
 
 <script type="text/javascript">
 
@@ -147,6 +149,8 @@
 						<a href='#volumeTab' class='selected'>Volume</a> <a
 							href='#labelmapTab' id='labelmapSwitch'
 							style='margin-left: 50px;'>Labelmap</a>
+							<a href='#optionTab' id='optionTabSwitch'
+							style='margin-left: 115px;'>Options</a>
 						<div id='volumeTab' class='tabContent'>
 
 
@@ -202,6 +206,35 @@
 								style='margin-left: 10px; margin-top: 4px; float: left;'></div>
 
 
+						</div>
+						<div id='optionTab' class='tabContent' style='display: none'>
+							
+							<button type="button" id="undoOption">Undo</button> <button type="button" id="redoOption">Redo</button>
+							<input id='colorOption' type='hidden'
+									class='color-picker black' size='6' value='#ffffff'/>
+							<br/>
+							
+							<b>Paint Brush Size: </b><br/>
+							<input type="radio" name="group1" value="small" id="brushSmallOption" checked> Small
+							<input type="radio" name="group1" value="medium"id="brushMediumOption"> Medium
+							<input type="radio" name="group1" value="large" id="brushLargeOption"> Large
+							<br/><br/>
+							
+							<b>Clobber</b> <input id="clobberOption" type="checkbox" name="clobber" checked="checked"/>
+							<br/>
+							
+							<b>2D Fill</b> <input id="2dBucketOption" type="checkbox" name="2dBucket"/>
+							
+							<b>	3D Fill</b> <input id="3dBucketOption" type="checkbox" name="3dBucket"/>
+							<br/>	
+							
+							<button type="button" id="copyOption">Copy</button>	<button type="button" id="pasteOption">Paste</button>
+							<select id="copyPasteOption">
+							  <option value="yellow">Yellow</option>
+							  <option value="red">Red</option>
+							  <option value="green">Green</option>
+							</select>
+							
 						</div>
 					</div>
 

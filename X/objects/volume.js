@@ -596,11 +596,22 @@ X.volume.prototype.__defineGetter__('spacing', function() {
  * @public
  */
 X.volume.prototype.__defineGetter__('image', function() {
-  
+
   return this._image;
   
 });
 
+X.volume.prototype.__defineSetter__('image', function(image) {
+	
+	this._image = image;
+	//this.modified(true);	
+});
+
+X.volume.prototype.__defineSetter__('labelmap', function(labelmap) {
+	
+	this._labelmap = labelmap;
+	//this.modified(true);	
+});
 
 /**
  * Get the label map of this volume. A new label map gets created if required

@@ -93,6 +93,53 @@ jQuery(function() {
   });
   jQuery('#opacity-labelmap').width(140);
   
-
-
+  // TODO: added
+  // Additional Options
+  //
+  
+  jQuery('#undoOption').click(function() {
+  	toggleUndoOption();
+  });
+  
+  jQuery('#redoOption').click(function() {
+  	toggleRedoOption();
+  });
+  
+  jQuery('#colorOption').miniColors({
+    opacity: 'true',
+    change: colorOption
+  });
+  
+  jQuery('#brushSmallOption').click(function() {
+  	toggleBrushSmallOption();
+  });
+  
+  jQuery('#brushMediumOption').click(function() {
+  	toggleBrushMediumOption();
+  });
+  
+  jQuery('#brushLargeOption').click(function() {
+  	toggleBrushLargeOption();
+  });
+  
+  jQuery('#clobberOption').click(function() {
+  	toggleClobberOption();
+  });
+  
+  jQuery('#2dBucketOption').click(function() {
+  	toggle2dBucketOption();
+  });
+  
+  jQuery('#3dBucketOption').click(function() {
+  	toggle3dBucketOption();
+  });
+  
+  jQuery('#copyOption').click(function() {
+  	toggleCopyOption();
+  });
+  
+  jQuery('#pasteOption').click(function() {
+  	togglePasteOption();
+  });
+	
 });

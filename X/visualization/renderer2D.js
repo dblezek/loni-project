@@ -434,7 +434,7 @@ X.renderer2D.prototype.update_ = function(object) {
   //
   // VOLUME
   //
-  
+// TODO only execute this if statement once  
   // with multiple files
   if (goog.isDefAndNotNull(file) && goog.isArray(file)) {
     // this object holds multiple files, a.k.a it is a DICOM series
@@ -450,7 +450,7 @@ X.renderer2D.prototype.update_ = function(object) {
         
         // start loading of each file..
         this._loader.load(file[_k], object);
-        
+        //TODO change this
       }
       
       return;
@@ -724,22 +724,30 @@ X.renderer2D.prototype.render_ = function(picking, invoked) {
     
     if (_paintSliceX * _paintSliceY > 0 && 
     	((_paintSliceY - 1) * _sliceWidth + _paintSliceX) == Math.ceil(_invertedIndex/4)) {
-     	_pixels[_invertedIndex - 3] = 255; // r
-    	_pixels[_invertedIndex - 2] = 255; // g
-    	_pixels[_invertedIndex - 1] = 0; // b
-    	_pixels[_invertedIndex] = 255; // a
+     	//_pixels[_invertedIndex - 3] = 255; // r
+    	//_pixels[_invertedIndex - 2] = 0; // g
+    	//_pixels[_invertedIndex - 1] = 255; // b
+    	//_pixels[_invertedIndex] = 255; // a
+    	_labelPixels[_invertedIndex - 3] = 255; // r
+    	_labelPixels[_invertedIndex - 2] = 255; // g
+    	_labelPixels[_invertedIndex - 1] = 0; // b
+    	_labelPixels[_invertedIndex] = 255; // a
     } else {
 	    _pixels[_invertedIndex - 3] = _color[0]; // r
 	    _pixels[_invertedIndex - 2] = _color[1]; // g
 	    _pixels[_invertedIndex - 1] = _color[2]; // b
 	    _pixels[_invertedIndex] = _color[3]; // a
+	    
+	    _labelPixels[_invertedIndex - 3] = _label[0]; // r
+	    _labelPixels[_invertedIndex - 2] = _label[1]; // g
+    	_labelPixels[_invertedIndex - 1] = _label[2]; // b
+    	_labelPixels[_invertedIndex] = _label[3]; // a
     }
 
-    _labelPixels[_invertedIndex - 3] = _label[0]; // r
-    _labelPixels[_invertedIndex - 2] = _label[1]; // g
-    _labelPixels[_invertedIndex - 1] = _label[2]; // b
-    _labelPixels[_invertedIndex] = _label[3]; // a
-    
+    //_labelPixels[_invertedIndex - 3] = _label[0]; // r
+    //_labelPixels[_invertedIndex - 2] = _label[1]; // g
+    //_labelPixels[_invertedIndex - 1] = _label[2]; // b
+    //_labelPixels[_invertedIndex] = _label[3]; // a
 
     _index = _index + 4; // increase by 4 units for r,g,b,a
     

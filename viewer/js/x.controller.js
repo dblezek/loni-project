@@ -1,3 +1,10 @@
+goog.require('X.renderer3D');
+goog.require('X.renderer2D');
+goog.require('X.mesh');
+goog.require('X.matrix');
+goog.require('X.volume');
+goog.require('X.cube');
+
 /**
  * Setup all UI elements once the loading was completed.
  */
@@ -267,6 +274,147 @@ function toggleLabelmapVisibility() {
   volume.labelmap.visible = !volume.labelmap.visible;
   
 
+}
+
+//////////////////////
+// TODO: Additional Options
+//////////////////////
+
+function toggleUndoOption() {
+	
+	if (!volume) {
+		return;
+	}
+	
+	// TODO: Need to undo
+	window.console.log('undo');
+}
+
+function toggleRedoOption() {
+	
+	if (!volume) {
+		return;
+	}
+	
+	// TODO: Need to redo
+	window.console.log('redo');
+}
+
+function colorOption(hex, rgba) {
+
+  if (!volume) {
+    return;
+  }
+  
+  var rgbaColor = [rgba.r, rgba.g, rgba.b, rgba.a];
+  window.console.log(rgbaColor);
+
+}
+
+function toggleBrushSmallOption() {
+	
+	if (!volume) {
+		return;
+	}
+	
+	// TODO: Need to make default cursor size
+	document.body.style.cursor='default';
+	window.console.log('small');
+}
+
+function toggleBrushMediumOption() {
+	
+	if (!volume) {
+		return;
+	}
+	
+	// TODO: Need to make medium cursor size
+	document.body.style.cursor="url('../gfx/medium.png'), default";
+	window.console.log('medium');
+}
+
+function toggleBrushLargeOption() {
+	
+	if (!volume) {
+		return;
+	}
+	
+	// TODO: Need to make large cursor size
+	document.body.style.cursor="url('../gfx/large.png'), default";
+	window.console.log('large');
+}
+
+function toggleClobberOption() {
+	
+	if (!volume) {
+		return;
+	}
+	
+	// TODO: Need to set clobber variable
+  	if ($('#clobberOption').prop('checked')) {
+
+  	} else {
+
+  	}
+	
+}
+
+function toggle2dBucketOption() {
+	
+	if (!volume) {
+		return;
+	}
+	
+	// TODO: Do nothing for now
+	if ($('#2dBucketOption').prop('checked')) {
+		document.body.style.cursor="url('../gfx/paint.png'), default";
+  	} else {
+  		document.body.style.cursor='default';
+  	}
+	
+}
+
+function toggle3dBucketOption() {
+	
+	if (!volume) {
+		return;
+	}
+	
+	// TODO: Do nothing for now
+	if ($('#3dBucketOption').prop('checked')) {
+		document.body.style.cursor="url('../data/paint.png'), default";
+  	} else {
+  		document.body.style.cursor='default';
+  	}
+	
+}
+
+function toggleCopyOption() {
+	
+	if (!volume) {
+		return;
+	}
+	
+	// TODO: Need to redo
+	
+	var e = document.getElementById('copyPasteOption');
+	var selectedView = e.options[e.selectedIndex].value; // yellow, red or green
+	
+	window.console.log('copy: ' + selectedView);
+}
+
+function togglePasteOption() {
+	
+	if (!volume) {
+		return;
+	}
+	
+	// TODO: Need to redo
+
+	var e = document.getElementById('copyPasteOption');
+	var selectedView = e.options[e.selectedIndex].value; // yellow, red or green
+	
+	window.console.log('paste: ' + selectedView);
 }
 
 //

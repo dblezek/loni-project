@@ -1,3 +1,10 @@
+goog.require('X.renderer3D');
+goog.require('X.renderer2D');
+goog.require('X.mesh');
+goog.require('X.matrix');
+goog.require('X.volume');
+goog.require('X.cube');
+
 function initializeRenderers(){
   
   if (ren3d) {
@@ -29,6 +36,30 @@ function initializeRenderers(){
     
     window.console.log('Loading completed.');
     
+// TODO changed    
+/*
+    window.console.log(volume.labelmap.image);
+    
+    var k;
+						var oned = new Array();
+						for (k=0; k<101; k++) {
+							oned[k] = 182;
+						}
+						var twod = new Array();
+						for (k=0; k<117; k++) {
+							twod[k] = oned;
+						}
+						var threed = new Array();
+						for (k=0; k<106; k++) {
+							threed[k] = twod;
+						}
+    volume.labelmap.image = threed;
+    //volume.labelmap.image = null;
+    //volume.modified(true);
+    //volume.volumeRendering = true;
+    //volume.labelmap.modified;
+    window.console.log(volume.labelmap.image);
+*/
     
     if (_data.volume.file != null) {
       
@@ -47,6 +78,10 @@ function initializeRenderers(){
     
     // render();
     
+  };
+  
+  ren3d.onRender = function() {
+  	//window.console.log('yo');
   };
   
   //
