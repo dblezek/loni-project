@@ -431,7 +431,7 @@ X.interactor.prototype.onMouseUp_ = function(event) {
   }
   
   if (this instanceof X.interactor2D) { 
-  	
+  	//debugger;
   	// create a new paint event
   	var e = new X.event.PaintEvent();
   	
@@ -487,8 +487,8 @@ X.interactor.prototype.onMouseUp = function(left, middle, right) {
  * @param {Event} event The browser fired event.
  * @protected
  */
-X.interactor.prototype.onMouseMovementOutside_ = function(event) {
-
+X.interactor.prototype.onMouseMovementOutside_ = function(event) {  
+  
   // reset the click flags
   this._mouseInside = false;
   if (this._config['KEYBOARD_ENABLED']) {
@@ -533,8 +533,266 @@ X.interactor.prototype.onMouseMove = function(event) {
  * @param {Event} event The browser fired event.
  * @protected
  */
-X.interactor.prototype.onMouseMovementInside_ = function(event) {
+ 
+  function Losp_Slice() {
+	this._init = false;
+	this._sliceWidth = null;
+	this._sliceHeight = null;
+	this._width = null;
+	this._height = null;
+	this._currentSlice = null;
+}
+ function Losp_Slices() {
+	this._Xslice = new Losp_Slice();
+	this._Yslice = new Losp_Slice();
+	this._Zslice = new Losp_Slice();
+ }
+ 
+ var losp_slices = new Losp_Slices(); //global var used to give slice data to this part of the code from renderer2D.js
 
+ 
+ 
+ 
+ 
+ 
+ function losp_2Dpixfill (rawData, index, red, green, blue, trans) {
+	//window.console.log('Previous pixel color: r' + rawData[index] + ', g' + rawData[index+1] + ', b' + rawData[index+2]);
+	rawData[index] = red;
+	rawData[index+1] = green;
+	rawData[index+2] = blue;
+	rawData[index+3] = trans;
+}
+
+//change a 3D pixel to a new tissue of type 'id' in labelmap at (x, y, z)
+function losp_change_pixel(x, y, z, id, labelmap) {
+	
+	//find dimensions						//same as  \/
+	var x_width = labelmap._dimensions[0]; //labelmap._children[0]._children.length;
+	var y_width = labelmap._dimensions[1]; //labelmap._children[1]._children.length;
+	var z_width = labelmap._dimensions[2]; //labelmap._children[2]._children.length;
+	//check dimensions in texture._width/hieght?
+	
+	if (x_width < 1 || x_width < 1 || x_width < 1) {
+		window.console.log('Error, non valid array size');
+		return -1; //error
+	}
+	
+	if (0>x || x_width<=x || 0>y || y_width<=y || 0>z || z_width<=z) {
+		window.console.log('Error, non valid coordinates');
+		return -1; //error
+	}
+	
+	if (!labelmap._colortable._map.containsKey(id)) {
+		window.console.log('Error, non valid color id');
+		return -1; //error
+	}
+	
+	//look up red, blue, green from colormapping	
+	var colors = labelmap._colortable._map.get(id);
+	var name =  colors[0];
+	var red =   colors[1]*255.0;
+	var green = colors[2]*255.0;
+	var blue =  colors[3]*255.0;
+	var trans = colors[4]*255.0;
+	
+	
+	
+	//.containsKey(key)
+	//.get(key, 0); //0 is the value to return if key is not found
+	
+	//image: this 3D array is never used but i am going to update it anyway
+//	if (!labelmap._image.length == 0) {
+//		labelmap._image[z][y][x] = id;
+//	}
+	//2D:	
+	losp_2Dpixfill(labelmap._slicesX._children[x]._texture._rawData, (z*y_width+y)*4, red, green, blue, trans); //set pixel in X plane
+	losp_2Dpixfill(labelmap._slicesY._children[y]._texture._rawData, (z*x_width+x)*4, red, green, blue, trans); //Y plane
+	losp_2Dpixfill(labelmap._slicesZ._children[z]._texture._rawData, (y*x_width+x)*4, red, green, blue, trans); //Z Plane
+			//2D; this code has the identical effect:
+			//losp_2Dpixfill(labelmap._children[0]._children[x]._texture._rawData, (z*y_width+y)*4, red, green, blue, trans); //set pixel in X plane
+			//losp_2Dpixfill(labelmap._children[1]._children[y]._texture._rawData, (z*x_width+x)*4, red, green, blue, trans); //Y plane
+			//losp_2Dpixfill(labelmap._children[2]._children[z]._texture._rawData, (y*x_width+x)*4, red, green, blue, trans); //Z Plane
+	
+	
+	//3D:
+	//set pixel in X plane
+	//Y plane
+	//Z Plane
+
+
+} 
+
+//radius of 1 is single pixel, view is 'x', 'y', or 'z'
+function losp_planerDot (x, y, z, view, radius, id, labelmap) {
+	var r = radius - 1;
+	var i, j;
+	switch (view)
+	{
+	case 'x': //*/
+		for(i=-r; i<=r; i++) {
+			for(j=-r; j<=r; j++) {
+				losp_change_pixel(x, y+i, z+j, id, labelmap);
+			}
+		}
+		break;
+	case 'y':
+		for(i=-r; i<=r; i++) {
+			for(j=-r; j<=r; j++) {
+				losp_change_pixel(x+i, y, z+j, id, labelmap);
+			}
+		}
+		break;
+	case 'z':
+		for(i=-r; i<=r; i++) {
+			for(j=-r; j<=r; j++) {
+				debugger;
+				losp_change_pixel(x+i, y+j, z, id, labelmap); //z-1
+			}
+		}
+		break;
+	default:
+		window.console.log('Error: invalid view.');
+	}
+}
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+X.interactor.prototype.onMouseMovementInside_ = function(event) {
+	
+	
+	
+/////////////////////////////////start add
+if (this instanceof X.interactor2D && this._leftButtonDown) {
+							
+	
+	window.console.log('_pX: ' + event.offsetX + '  _pY: ' + event.offsetY);
+	window.console.log('_Volume: ' + volume);
+
+	
+	//if (losp_sliceHeight!=null)
+	//	window.console.log('losp_sliceHeight: ' + losp_sliceHeight);
+	
+	
+	var slicedata = null;
+	var view = null;
+	switch (this._id)
+	{
+	case 10:
+		slicedata = losp_slices._Xslice;
+		view = 'x';
+	  break;
+	case 17:
+		slicedata = losp_slices._Yslice;
+		view = 'y';
+	  break;
+	case 24:
+		slicedata = losp_slices._Zslice;
+		view = 'z';
+	  break;
+	default:
+	  window.console.log('Error: bad _camera._id');
+	}
+	
+	
+	
+	if (0==Math.floor(Math.random()*10))
+		debugger;
+	
+	
+	
+	
+	
+	var _paintX = event.offsetX;
+	var _paintY = event.offsetY;
+	
+	
+  var _paintSliceX = 0;
+  var _paintSliceY = 0;
+  
+  if (_paintX * _paintY > 0) {
+
+  	var _sliceRatio = slicedata._sliceWidth/slicedata._sliceHeight;
+  	var _viewRatio = slicedata._width/slicedata._height;
+    
+  	if (_viewRatio < _sliceRatio) {
+  		// letter boxed with black regions on top and bottom
+  		var _zoomRatio = slicedata._sliceWidth / slicedata._width;
+  		var _zoomedSliceHeight = slicedata._sliceHeight / _zoomRatio;
+  		var _margin = (slicedata._height - _zoomedSliceHeight)/2;
+  		_paintSliceY = _paintY - _margin;
+  		_paintSliceY = _paintSliceY * _zoomRatio;
+  		_paintSliceX = _paintX * _zoomRatio;
+  	} else {
+  		// letter boxed with black regions on sides
+  		var _zoomRatio = slicedata._sliceHeight / slicedata._height;
+  		var _zoomedSliceWidth = slicedata._sliceWidth / _zoomRatio;
+  		var _margin = (slicedata._width - _zoomedSliceWidth)/2;
+  		_paintSliceX = _paintX - _margin;
+  		_paintSliceX = _paintSliceX * _zoomRatio;
+  		_paintSliceY = _paintY * _zoomRatio;
+  	}
+  	
+  	if (_paintSliceX * _paintSliceY > 0) {
+  		_paintSliceX = Math.floor(_paintSliceX+0.5);
+  		_paintSliceY = Math.floor(_paintSliceY+0.5);
+		_paintSliceZ = Math.floor(slicedata._currentSlice+0.5);
+		
+		//keyword
+		//find dimensions						//same as  \/
+		var x_width = volume._labelmap._dimensions[0]; //labelmap._children[0]._children.length;
+		var y_width = volume._labelmap._dimensions[1]; //labelmap._children[1]._children.length;
+		var z_width = volume._labelmap._dimensions[2]; //labelmap._children[2]._children.length;
+		//*
+		
+		var xx, yy, zz, plane;
+		switch (view)
+		{
+		case 'x':
+			x = _paintSliceZ
+			y = y_width - _paintSliceX;
+			z = z_width - _paintSliceY;
+		  break;
+		case 'y':
+			x = x_width - _paintSliceX;
+			y = _paintSliceZ;
+			z = z_width - _paintSliceY;
+		  break;
+		case 'z':
+			x = x_width - _paintSliceX;
+			y = y_width - _paintSliceY;
+			z = _paintSliceZ;
+		  break;
+		default:
+		  window.console.log('Error: bad _camera._id');
+		}
+		//debugger;
+		losp_planerDot (x, y, z, view, 2, 25, volume._labelmap);
+		
+		
+  	}
+  }
+	//*/
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+										
+}
+//////////////////////////////////////////end add
+	
   this['mousemoveEvent'] = event; // we need to buffer the event to run eval in
   // advanced compilation
   eval("this.onMouseMove(this['mousemoveEvent'])");
