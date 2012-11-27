@@ -430,8 +430,7 @@ X.interactor.prototype.onMouseUp_ = function(event) {
     
   }
   
-  if (this instanceof X.interactor2D) { 
-  	//debugger;
+  if (this instanceof X.interactor2D) {
   	// create a new paint event
   	var e = new X.event.PaintEvent();
   	
@@ -488,7 +487,6 @@ X.interactor.prototype.onMouseUp = function(left, middle, right) {
  * @protected
  */
 X.interactor.prototype.onMouseMovementOutside_ = function(event) {  
-  
   // reset the click flags
   this._mouseInside = false;
   if (this._config['KEYBOARD_ENABLED']) {
@@ -533,7 +531,12 @@ X.interactor.prototype.onMouseMove = function(event) {
  * @param {Event} event The browser fired event.
  * @protected
  */
- 
+ function Losp_Labelundo() {
+	this._rawDataX = null;
+	this._rawDataY = null;
+	this._rawDataZ = null;
+	this._image = null;
+ }
   function Losp_Slice() {
 	this._init = false;
 	this._sliceWidth = null;
@@ -543,6 +546,7 @@ X.interactor.prototype.onMouseMove = function(event) {
 	this._currentSlice = null;
 }
  function Losp_Slices() {
+	this._labelundo = new Losp_Labelundo();
 	this._Xslice = new Losp_Slice();
 	this._Yslice = new Losp_Slice();
 	this._Zslice = new Losp_Slice();
@@ -645,7 +649,6 @@ function losp_planerDot (x, y, z, view, radius, id, labelmap) {
 	case 'z':
 		for(i=-r; i<=r; i++) {
 			for(j=-r; j<=r; j++) {
-				debugger;
 				losp_change_pixel(x+i, y+j, z, id, labelmap); //z-1
 			}
 		}
@@ -700,8 +703,8 @@ if (this instanceof X.interactor2D && this._leftButtonDown) {
 	
 	
 	
-	if (0==Math.floor(Math.random()*10))
-		debugger;
+	//if (0==Math.floor(Math.random()*10))
+	//	debugger;
 	
 	
 	
@@ -740,7 +743,7 @@ if (this instanceof X.interactor2D && this._leftButtonDown) {
   	if (_paintSliceX * _paintSliceY > 0) {
   		_paintSliceX = Math.floor(_paintSliceX+0.5);
   		_paintSliceY = Math.floor(_paintSliceY+0.5);
-		_paintSliceZ = Math.floor(slicedata._currentSlice+0.5);
+		_paintSliceZ = Math.floor(slicedata._currentSlice+0.49);
 		
 		//keyword
 		//find dimensions						//same as  \/
