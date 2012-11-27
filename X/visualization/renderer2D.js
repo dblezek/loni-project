@@ -663,32 +663,32 @@ X.renderer2D.prototype.render_ = function(picking, invoked) {
   var _paintSliceX = 0;
   var _paintSliceY = 0;
   
+  
+	//update these global vars in used in interactor.js
+	var slicetoupdate = null;
+	switch (this._camera._id)
+	{
+	case 12:
+		slicetoupdate = losp_slices._Xslice;
+	break;
+	case 19:
+		slicetoupdate = losp_slices._Yslice;
+	break;
+	case 26:
+		slicetoupdate = losp_slices._Zslice;
+	break;
+	default:
+	window.console.log('Error: bad _camera._id');
+	}
+	slicetoupdate._init = true;
+	slicetoupdate._sliceWidth = _sliceWidth;
+	slicetoupdate._sliceHeight = _sliceHeight;
+	slicetoupdate._width = this._width;
+	slicetoupdate._height = this._height;
+	slicetoupdate._currentSlice = _currentSlice;
+		
+		
   if (this._paintX * this._paintY > 0) {
-	//debugger;
-	
-		var slicetoupdate = null;
-		switch (this._camera._id)
-		{
-		case 12:
-			slicetoupdate = losp_slices._Xslice;
-		  break;
-		case 19:
-			slicetoupdate = losp_slices._Yslice;
-		  break;
-		case 26:
-			slicetoupdate = losp_slices._Zslice;
-		  break;
-		default:
-		  window.console.log('Error: bad _camera._id');
-		}
-		slicetoupdate._init = true;
-		slicetoupdate._sliceWidth = _sliceWidth;
-		slicetoupdate._sliceHeight = _sliceHeight;
-		slicetoupdate._width = this._width;
-		slicetoupdate._height = this._height;
-		slicetoupdate._currentSlice = _currentSlice;
-		
-		
 		
   	var _sliceRatio = _sliceWidth/_sliceHeight;
   	var _viewRatio = this._width/this._height;
@@ -715,7 +715,7 @@ X.renderer2D.prototype.render_ = function(picking, invoked) {
   		_paintSliceX = Math.floor(_paintSliceX+0.5);
   		_paintSliceY = Math.floor(_paintSliceY+0.5);
 		_paintSliceZ = Math.floor(_currentSlice+0.5);
-		
+		//debugger;
 		//keyword
 		//find dimensions						//same as  \/
 		var x_width = _volume._labelmap._dimensions[0]; //labelmap._children[0]._children.length;
@@ -726,8 +726,6 @@ X.renderer2D.prototype.render_ = function(picking, invoked) {
 		var dragg = this._interactor._leftButtonDown;
 		if (dragg) {
 			window.console.log('_pX: ' + this._paintX + '  _pY: ' + this._paintY);
-			//if (0==Math.floor(Math.random()*100))
-			//	debugger;
 		}
 			
 		var xx, yy, zz, plane;
