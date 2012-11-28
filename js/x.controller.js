@@ -70,8 +70,8 @@ function setupUi() {
     
     jQuery('#labelmapSwitch').show();
     
-    jQuery('#opacity-labelmap').slider("option", "value", 40);
-    volume.labelmap.opacity = 0.4; // re-propagate
+    jQuery('#opacity-labelmap').slider("option", "value", 99);
+    volume.labelmap.opacity = 0.99; // re-propagate
     
 
   } else {
@@ -316,8 +316,8 @@ function toggleBrushSmallOption() {
 	}
 
 	// TODO: Need to make default cursor size
-	document.body.style.cursor = 'default';
-	volume._brushSize = 1;
+	//document.body.style.cursor = 'default';
+	losp_slices._brush._size = 1;
 	//window.console.log('small');
 }
 
@@ -328,8 +328,8 @@ function toggleBrushMediumOption() {
 	}
 
 	// TODO: Need to make medium cursor size
-	document.body.style.cursor = "url('../gfx/medium.png'), default";
-	volume._brushSize = 5;
+	//document.body.style.cursor = "url('../gfx/medium.png'), default";
+	losp_slices._brush._size = 3;
 	//window.console.log('medium');
 }
 
@@ -340,8 +340,8 @@ function toggleBrushLargeOption() {
 	}
 
 	// TODO: Need to make large cursor size
-	document.body.style.cursor = "url('../gfx/large.png'), default";
-	volume._brushSize = 10;
+	//document.body.style.cursor = "url('../gfx/large.png'), default";
+	losp_slices._brush._size = 5;
 	//window.console.log('large');
 }
 
@@ -353,9 +353,9 @@ function toggleClobberOption() {
 
 	// TODO: Need to set clobber variable
 	if ($('#clobberOption').prop('checked')) {
-
+		losp_slices._brush._clobber = true;
 	} else {
-
+		losp_slices._brush._clobber = false;
 	}
 
 }
@@ -368,9 +368,11 @@ function toggle2dBucketOption() {
 
 	// TODO: Do nothing for now
 	if ($('#2dBucketOption').prop('checked')) {
-		document.body.style.cursor = "url('../gfx/paint.png'), default";
+		//document.body.style.cursor = "url('../gfx/paint.png'), default";
+		losp_slices._brush._mode = 2;
 	} else {
-		document.body.style.cursor = 'default';
+		//document.body.style.cursor = 'default';
+		losp_slices._brush._mode = 1;
 	}
 
 }
@@ -383,9 +385,9 @@ function toggle3dBucketOption() {
 
 	// TODO: Do nothing for now
 	if ($('#3dBucketOption').prop('checked')) {
-		document.body.style.cursor = "url('../gfx/paint.png'), default";
+		//document.body.style.cursor = "url('../gfx/paint.png'), default";
 	} else {
-		document.body.style.cursor = 'default';
+		//document.body.style.cursor = 'default';
 	}
 
 }

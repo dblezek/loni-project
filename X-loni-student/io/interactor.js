@@ -540,7 +540,7 @@ X.interactor.prototype.onMouseMove = function(event) {
 	this._rawDataY = null;
 	this._rawDataZ = null;
 	this._image = null; //3D array
-	this._inaction = false; //are we in the middle of a draw action?
+	this._inaction = false; //are we in the middle of a draw action
  }
  
  //holds slice data for drawing
@@ -552,12 +552,22 @@ X.interactor.prototype.onMouseMove = function(event) {
 	this._height = null;
 	this._currentSlice = null;
 }
+
+//holds brush data
+  function Losp_Brush() {
+	this._size = 1;
+	this._colorid = 306; //blue
+	this._clobber = true;
+	this._mode = 1; //1=draw, 2=2D fill, 3=3D fill
+}
+
 //holds undo and slice data
  function Losp_Slices() {
 	this._labelundo = new Losp_Labelundo();
 	this._Xslice = new Losp_Slice();
 	this._Yslice = new Losp_Slice();
 	this._Zslice = new Losp_Slice();
+	this._brush = new Losp_Brush();
  }
  
  
@@ -567,15 +577,16 @@ X.interactor.prototype.onMouseMove = function(event) {
  //changes the given pixel in the 1D "_rawData" arrays
  function losp_2Dpixfill (rawData, index, red, green, blue, trans) {
 	//window.console.log('Previous pixel color: r' + rawData[index] + ', g' + rawData[index+1] + ', b' + rawData[index+2] + ', index: ' + index);
-	rawData[index] = red;
-	rawData[index+1] = green;
-	rawData[index+2] = blue;
-	rawData[index+3] = trans;
+	if (losp_slices._brush._clobber || (rawData[index]==0 && rawData[index+1]==0 && rawData[index+2]==0)) {
+		rawData[index] = red;
+		rawData[index+1] = green;
+		rawData[index+2] = blue;
+		rawData[index+3] = trans;
+	}
 }
 
 // saves the current data so it can be restored if undo is called
 function losp_updateundo (labelmap) {
-	window.console.log("save (undo) start");
 	losp_slices._labelundo._image = labelmap._image;
 	losp_slices._labelundo._rawDataX = new Array();
 	losp_slices._labelundo._rawDataY = new Array();
@@ -590,13 +601,10 @@ function losp_updateundo (labelmap) {
 		losp_slices._labelundo._rawDataY[i] = new Uint8Array(labelmap._slicesY._children[i]._texture._rawData);
 	for (i=0; i<z_width; i++)
 		losp_slices._labelundo._rawDataZ[i] = new Uint8Array(labelmap._slicesZ._children[i]._texture._rawData);
-		
-	window.console.log("save (undo) done");
 }
 
 //restores the undo data
 function losp_performundo (labelmap) {
-	window.console.log("undo");
 	var x_width = labelmap._dimensions[0];
 	var y_width = labelmap._dimensions[1];
 	var z_width = labelmap._dimensions[2];
@@ -727,7 +735,107 @@ function losp_planerDot (x, y, z, view, radius, id, labelmap) {
 		window.console.log('Error: invalid view.');
 	}
 }
- 
+
+//check if 4 ints are equal
+function losp_checkequal (A, B, C, D) {
+	if (Math.floor(A+0.5) != Math.floor(B+0.5))
+		return false;
+	if (Math.floor(A+0.5) != Math.floor(C+0.5))
+		return false;
+	if (Math.floor(A+0.5) != Math.floor(D+0.5))
+		return false;
+	return true;
+}
+
+function losp_2D_fill(x, y, z, view, id, labelmap) {
+	//find dimensions						//same as  \/
+	var x_width = labelmap._dimensions[0]; //labelmap._children[0]._children.length;
+	var y_width = labelmap._dimensions[1]; //labelmap._children[1]._children.length;
+	var z_width = labelmap._dimensions[2]; //labelmap._children[2]._children.length;
+	
+	if (x_width < 1 || y_width < 1 || z_width < 1) {
+		window.console.log('Error, non valid array size');
+		return -1; //error
+	}	
+	//check if pixel is inside bounds
+	if (0>x || x_width<=x || 0>y || y_width<=y || 0>z || z_width<=z) {
+		return; //dead end
+	}
+	if (!labelmap._colortable._map.containsKey(id)) {
+		window.console.log('Error, non valid color id');
+		return -1; //error
+	}
+	
+	//look up red, blue, green from colormapping	
+	var colors = labelmap._colortable._map.get(id);
+	var name =  colors[0];
+	var red =   colors[1]*255.0;
+	var green = colors[2]*255.0;
+	var blue =  colors[3]*255.0;
+	var trans = colors[4]*255.0;
+	
+	//find color in 4 sources, confirm 3 rawData
+	var Xred   = labelmap._slicesX._children[x]._texture._rawData[(z*y_width+y)*4];
+	var Xgreen = labelmap._slicesX._children[x]._texture._rawData[(z*y_width+y)*4+1];
+	var Xblue  = labelmap._slicesX._children[x]._texture._rawData[(z*y_width+y)*4+2];
+	var Xtrans = labelmap._slicesX._children[x]._texture._rawData[(z*y_width+y)*4+3];
+	
+	var Yred   = labelmap._slicesY._children[y]._texture._rawData[(z*x_width+x)*4];
+	var Ygreen = labelmap._slicesY._children[y]._texture._rawData[(z*x_width+x)*4+1];
+	var Yblue  = labelmap._slicesY._children[y]._texture._rawData[(z*x_width+x)*4+2];
+	var Ytrans = labelmap._slicesY._children[y]._texture._rawData[(z*x_width+x)*4+3];
+	
+	var Zred   = labelmap._slicesZ._children[z]._texture._rawData[(y*x_width+x)*4];
+	var Zgreen = labelmap._slicesZ._children[z]._texture._rawData[(y*x_width+x)*4+1];
+	var Zblue  = labelmap._slicesZ._children[z]._texture._rawData[(y*x_width+x)*4+2];
+	var Ztrans = labelmap._slicesZ._children[z]._texture._rawData[(y*x_width+x)*4+3];
+	
+	var imageId = labelmap._image[z][y][x];
+	var imagecolors = labelmap._colortable._map.get(imageId);
+	var Ired =   imagecolors[1]*255.0;
+	var Igreen = imagecolors[2]*255.0;
+	var Iblue =  imagecolors[3]*255.0;
+	var Itrans = imagecolors[4]*255.0;
+	
+	//if (! (losp_checkequal(Ired, Xred, Yred, Zred) && losp_checkequal(Igreen, Xgreen, Ygreen, Zgreen) && losp_checkequal(Iblue, Xblue, Yblue, Zblue) && losp_checkequal(Itrans, Xtrans, Ytrans, Ztrans) ) ) {
+	if (! (losp_checkequal(Xred, Xred, Yred, Zred) && losp_checkequal(Xgreen, Xgreen, Ygreen, Zgreen) && losp_checkequal(Xblue, Xblue, Yblue, Zblue) && losp_checkequal(Xtrans, Xtrans, Ytrans, Ztrans) ) ) {
+		window.console.log("Error: color inconsitency");
+		debugger;
+		return -1; //error
+	}
+	
+	//if pixel is already colored, end of line
+	if (red==Xred && green==Xgreen && blue==Xblue && trans==Xtrans)
+		return; //dead end
+	
+	//change pixel
+	losp_change_pixel(x, y, z, id, labelmap);
+	
+	//call on all 4 adjacent pixels
+	switch (view)
+	{
+	case 'x':
+		losp_2D_fill(x, y+1, z, view, id, labelmap);
+		losp_2D_fill(x, y-1, z, view, id, labelmap);
+		losp_2D_fill(x, y, z+1, view, id, labelmap);
+		losp_2D_fill(x, y, z-1, view, id, labelmap);
+		break;
+	case 'y':
+		losp_2D_fill(x+1, y, z, view, id, labelmap);
+		losp_2D_fill(x-1, y, z, view, id, labelmap);
+		losp_2D_fill(x, y, z+1, view, id, labelmap);
+		losp_2D_fill(x, y, z-1, view, id, labelmap);
+		break;
+	case 'z':
+		losp_2D_fill(x, y+1, z, view, id, labelmap);
+		losp_2D_fill(x, y-1, z, view, id, labelmap);
+		losp_2D_fill(x+1, y, z, view, id, labelmap);
+		losp_2D_fill(x-1, y, z, view, id, labelmap);
+		break;
+	default:
+		window.console.log('Error: invalid view.');
+	}
+}
  
 X.interactor.prototype.onMouseMovementInside_ = function(event) {
 	
@@ -817,8 +925,10 @@ if (this instanceof X.interactor2D && this._leftButtonDown) {
 		default:
 		  window.console.log('Error: bad _camera._id');
 		}
-		
-		losp_planerDot (x, y, z, view, 2, 25, volume._labelmap);
+		if (losp_slices._brush._mode == 1)
+			losp_planerDot(x, y, z, view, losp_slices._brush._size, losp_slices._brush._colorid, volume._labelmap);
+		else
+			losp_2D_fill(x, y, z, view, losp_slices._brush._colorid, volume._labelmap);
   	}
   }										
 }
