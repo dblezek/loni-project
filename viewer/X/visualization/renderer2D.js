@@ -36,22 +36,6 @@ goog.require('goog.math.Vec3');
 
 
 
-
-
-
-///////////////////////////////////////////////////////////////////////////////add start
-
-
-
-
-///////////////////////////////////////////////////////////////////////////////add end
-
-
-
-
-
-
-
 /**
  * Create a 2D renderer inside a given DOM Element.
  * 
@@ -715,18 +699,13 @@ X.renderer2D.prototype.render_ = function(picking, invoked) {
   		_paintSliceX = Math.floor(_paintSliceX+0.5);
   		_paintSliceY = Math.floor(_paintSliceY+0.5);
 		_paintSliceZ = Math.floor(_currentSlice+0.5);
-		//debugger;
-		//keyword
+		
+		//losp
 		//find dimensions						//same as  \/
 		var x_width = _volume._labelmap._dimensions[0]; //labelmap._children[0]._children.length;
 		var y_width = _volume._labelmap._dimensions[1]; //labelmap._children[1]._children.length;
 		var z_width = _volume._labelmap._dimensions[2]; //labelmap._children[2]._children.length;
 		//*
-		
-		var dragg = this._interactor._leftButtonDown;
-		if (dragg) {
-			window.console.log('_pX: ' + this._paintX + '  _pY: ' + this._paintY);
-		}
 			
 		var xx, yy, zz, plane;
 		switch (this._camera._id)

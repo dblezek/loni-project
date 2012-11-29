@@ -150,6 +150,27 @@ function setupUi() {
     
   }
   
+  	// TODO: Set up initial color
+	var elem = document.getElementById('colorId');
+	elem.value = losp_slices._brush._colorid;
+
+	var colors = volume.labelmap._colortable._map.get(losp_slices._brush._colorid);
+
+	if (colors == null) {
+		document.getElementById("labelName").innerHTML = "Error: Does not exist";
+		return;
+	}
+
+	var name = colors[0];
+	var red = colors[1] * 255.0;
+	var green = colors[2] * 255.0;
+	var blue = colors[3] * 255.0;
+	var trans = colors[4] * 255.0;
+
+	elem.style.backgroundColor = "rgba(" + red + "," + green + "," + blue + "," + trans + ")";
+	document.getElementById("labelName").innerHTML = name;
+
+  
 }
 
 function volumerenderingOnOff(bool) {
@@ -279,6 +300,50 @@ function toggleLabelmapVisibility() {
 // TODO: Additional Options
 ////////////////////////////////////////////////
 
+function colorIdChange() {
+	
+	if (!volume) {
+		return;
+	}
+	
+	var elem = document.getElementById('colorId');
+	var input = elem.value;
+	
+	if (input == '') {
+		return;
+	}
+	
+	var colors = volume.labelmap._colortable._map.get(input);
+	
+	if (colors == null) {
+		document.getElementById("labelName").innerHTML = "Error: Does not exist";
+		return;
+	}
+	
+	var name =  colors[0];
+	var red =   colors[1]*255.0;
+	var green = colors[2]*255.0;
+	var blue =  colors[3]*255.0;
+	var trans = colors[4]*255.0;
+	
+	elem.style.backgroundColor = "rgba(" + red + "," + green + "," + blue + "," + trans + ")";
+	document.getElementById("labelName").innerHTML = name;
+	
+	// Set id to appropriate color
+	losp_slices._brush._colorid = input;
+}
+
+function paintBrushSize() {
+	
+	if (!volume) {
+		return;
+	}
+	
+	var e = document.getElementById('paintBrushSize');
+	var selectedView = e.options[e.selectedIndex].value;
+	losp_slices._brush._size = selectedView;
+}
+
 function toggleUndoOption() {
 
 	if (!volume) {
@@ -286,65 +351,75 @@ function toggleUndoOption() {
 	}
 
 	// TODO: Need to undo
+	var cur = document.getElementById('undoOption');
+	
+	if (cur.innerHTML == 'Undo') {
+		cur.innerHTML = 'Redo';
+	} else {
+		cur.innerHTML = 'Undo';
+	}
+	
+	losp_performundo(volume._labelmap);
+	losp_checkimage(volume._labelmap);
 	//window.console.log('undo');
 }
 
-function toggleRedoOption() {
+// function toggleRedoOption() {
+// 
+	// if (!volume) {
+		// return;
+	// }
+// 
+	// // TODO: Need to redo
+	// //window.console.log('redo');
+// }
 
-	if (!volume) {
-		return;
-	}
+// function colorOption(hex, rgba) {
+// 
+	// if (!volume) {
+		// return;
+	// }
+// 
+	// var rgbaColor = [rgba.r, rgba.g, rgba.b, rgba.a];
+	// //window.console.log(rgbaColor);
+// 
+// }
 
-	// TODO: Need to redo
-	//window.console.log('redo');
-}
-
-function colorOption(hex, rgba) {
-
-	if (!volume) {
-		return;
-	}
-
-	var rgbaColor = [rgba.r, rgba.g, rgba.b, rgba.a];
-	//window.console.log(rgbaColor);
-
-}
-
-function toggleBrushSmallOption() {
-
-	if (!volume) {
-		return;
-	}
-
-	// TODO: Need to make default cursor size
-	document.body.style.cursor = 'default';
-	volume._brushSize = 1;
-	//window.console.log('small');
-}
-
-function toggleBrushMediumOption() {
-
-	if (!volume) {
-		return;
-	}
-
-	// TODO: Need to make medium cursor size
-	document.body.style.cursor = "url('../gfx/medium.png'), default";
-	volume._brushSize = 5;
-	//window.console.log('medium');
-}
-
-function toggleBrushLargeOption() {
-
-	if (!volume) {
-		return;
-	}
-
-	// TODO: Need to make large cursor size
-	document.body.style.cursor = "url('../gfx/large.png'), default";
-	volume._brushSize = 10;
-	//window.console.log('large');
-}
+// function toggleBrushSmallOption() {
+// 
+	// if (!volume) {
+		// return;
+	// }
+// 
+	// // TODO: Need to make default cursor size
+	// document.body.style.cursor = 'default';
+	// volume._brushSize = 1;
+	// //window.console.log('small');
+// }
+// 
+// function toggleBrushMediumOption() {
+// 
+	// if (!volume) {
+		// return;
+	// }
+// 
+	// // TODO: Need to make medium cursor size
+	// document.body.style.cursor = "url('../gfx/medium.png'), default";
+	// volume._brushSize = 5;
+	// //window.console.log('medium');
+// }
+// 
+// function toggleBrushLargeOption() {
+// 
+	// if (!volume) {
+		// return;
+	// }
+// 
+	// // TODO: Need to make large cursor size
+	// document.body.style.cursor = "url('../gfx/large.png'), default";
+	// volume._brushSize = 10;
+	// //window.console.log('large');
+// }
 
 function toggleClobberOption() {
 
@@ -354,9 +429,9 @@ function toggleClobberOption() {
 
 	// TODO: Need to set clobber variable
 	if ($('#clobberOption').prop('checked')) {
-
+		losp_slices._brush._clobber = true;
 	} else {
-
+		losp_slices._brush._clobber = false;
 	}
 
 }
@@ -369,9 +444,13 @@ function toggle2dBucketOption() {
 
 	// TODO: Do nothing for now
 	if ($('#2dBucketOption').prop('checked')) {
-		document.body.style.cursor = "url('../gfx/paint.png'), default";
+		//document.body.style.cursor = "url('../gfx/paint.png'), default";
+		losp_slices._brush._mode = 2;
+		document.getElementById('3dBucketOption').disabled = true;
 	} else {
-		document.body.style.cursor = 'default';
+		//document.body.style.cursor = 'default';
+		losp_slices._brush._mode = 1;
+		document.getElementById('3dBucketOption').disabled = false;
 	}
 
 }
@@ -384,14 +463,18 @@ function toggle3dBucketOption() {
 
 	// TODO: Do nothing for now
 	if ($('#3dBucketOption').prop('checked')) {
-		document.body.style.cursor = "url('../gfx/paint.png'), default";
+		//document.body.style.cursor = "url('../gfx/paint.png'), default";
+		
+		document.getElementById('2dBucketOption').disabled = true;
 	} else {
-		document.body.style.cursor = 'default';
+		//document.body.style.cursor = 'default';
+		
+		document.getElementById('2dBucketOption').disabled = false;
 	}
 
 }
 
-function toggleCopyOption() {
+function copyNextOption() {
 
 	if (!volume) {
 		return;
@@ -406,7 +489,7 @@ function toggleCopyOption() {
 	//window.console.log('copy: ' + selectedView);
 }
 
-function togglePasteOption() {
+function copyPrevOption() {
 
 	if (!volume) {
 		return;

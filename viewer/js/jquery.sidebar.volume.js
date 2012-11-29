@@ -97,30 +97,38 @@ jQuery(function() {
   // Additional Options
   //
   
+  jQuery('#colorId').keyup(function() {
+  	colorIdChange();
+  });
+  
+  jQuery('#paintBrushSize').change(function() {
+  	paintBrushSize();
+  });
+  
   jQuery('#undoOption').click(function() {
   	toggleUndoOption();
   });
   
-  jQuery('#redoOption').click(function() {
-  	toggleRedoOption();
-  });
+  // jQuery('#redoOption').click(function() {
+  	// toggleRedoOption();
+  // });
   
-  jQuery('#colorOption').miniColors({
-    opacity: 'true',
-    change: colorOption
-  });
+  // jQuery('#colorOption').miniColors({
+    // opacity: 'true',
+    // change: colorOption
+  // });
   
-  jQuery('#brushSmallOption').click(function() {
-  	toggleBrushSmallOption();
-  });
-  
-  jQuery('#brushMediumOption').click(function() {
-  	toggleBrushMediumOption();
-  });
-  
-  jQuery('#brushLargeOption').click(function() {
-  	toggleBrushLargeOption();
-  });
+  // jQuery('#brushSmallOption').click(function() {
+  	// toggleBrushSmallOption();
+  // });
+//   
+  // jQuery('#brushMediumOption').click(function() {
+  	// toggleBrushMediumOption();
+  // });
+//   
+  // jQuery('#brushLargeOption').click(function() {
+  	// toggleBrushLargeOption();
+  // });
   
   jQuery('#clobberOption').click(function() {
   	toggleClobberOption();
@@ -134,12 +142,12 @@ jQuery(function() {
   	toggle3dBucketOption();
   });
   
-  jQuery('#copyOption').click(function() {
-  	toggleCopyOption();
+  jQuery('#copyNext').click(function() {
+  	copyNextOption();
   });
   
-  jQuery('#pasteOption').click(function() {
-  	togglePasteOption();
+  jQuery('#copyPrev').click(function() {
+  	copyPrevOption();
   });
 	
 });
