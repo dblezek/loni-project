@@ -293,7 +293,8 @@ function toggleRedoOption() {
 	if (!volume) {
 		return;
 	}
-
+	
+losp_checkimage(volume._labelmap);
 	// TODO: Need to redo
 	//window.console.log('redo');
 }

@@ -836,7 +836,57 @@ function losp_2D_fill(x, y, z, view, id, labelmap) {
 		window.console.log('Error: invalid view.');
 	}
 }
- 
+
+//check to make sure that the labelmap and rawDatas are consistent by checking percent% of pixels
+function losp_checkimage (labelmap, percent) {
+	window.console.log("check start");
+	if(typeof(percent)==='undefined') percent = 100.0;
+	
+	var x_width = labelmap._dimensions[0]; //labelmap._children[0]._children.length;
+	var y_width = labelmap._dimensions[1]; //labelmap._children[1]._children.length;
+	var z_width = labelmap._dimensions[2]; //labelmap._children[2]._children.length;
+	
+	if (x_width < 1 || y_width < 1 || z_width < 1) {
+		window.console.log('Error, non valid array size');
+		return -1; //error
+	}
+	
+	var x, y, z;
+	for (x=0; x<x_width; x++) {
+	for (y=0; y<y_width; y++) {
+	for (z=0; z<z_width; z++) {
+		if (Math.floor(percent <= Math.random()*100.0))
+			continue;
+		//find color in 4 sources, confirm 3 rawData
+		var Xred   = labelmap._slicesX._children[x]._texture._rawData[(z*y_width+y)*4];
+		var Xgreen = labelmap._slicesX._children[x]._texture._rawData[(z*y_width+y)*4+1];
+		var Xblue  = labelmap._slicesX._children[x]._texture._rawData[(z*y_width+y)*4+2];
+		var Xtrans = labelmap._slicesX._children[x]._texture._rawData[(z*y_width+y)*4+3];
+		var Yred   = labelmap._slicesY._children[y]._texture._rawData[(z*x_width+x)*4];
+		var Ygreen = labelmap._slicesY._children[y]._texture._rawData[(z*x_width+x)*4+1];
+		var Yblue  = labelmap._slicesY._children[y]._texture._rawData[(z*x_width+x)*4+2];
+		var Ytrans = labelmap._slicesY._children[y]._texture._rawData[(z*x_width+x)*4+3];
+		var Zred   = labelmap._slicesZ._children[z]._texture._rawData[(y*x_width+x)*4];
+		var Zgreen = labelmap._slicesZ._children[z]._texture._rawData[(y*x_width+x)*4+1];
+		var Zblue  = labelmap._slicesZ._children[z]._texture._rawData[(y*x_width+x)*4+2];
+		var Ztrans = labelmap._slicesZ._children[z]._texture._rawData[(y*x_width+x)*4+3];
+		var imageId = labelmap._image[z][y][x];
+		var imagecolors = labelmap._colortable._map.get(imageId);
+		var Ired =   imagecolors[1]*255.0;
+		var Igreen = imagecolors[2]*255.0;
+		var Iblue =  imagecolors[3]*255.0;
+		var Itrans = imagecolors[4]*255.0;
+		
+		if (! (losp_checkequal(Ired, Xred, Yred, Zred) && losp_checkequal(Igreen, Xgreen, Ygreen, Zgreen) && losp_checkequal(Iblue, Xblue, Yblue, Zblue) && losp_checkequal(Itrans, Xtrans, Ytrans, Ztrans) ) ) {
+			window.console.log("INCONSISTENCY FOUND: ("+x+", "+y+", "+z+")");
+			return;
+		}
+	}}}
+	window.console.log("check complete: data consistent");
+}
+
+
+
 X.interactor.prototype.onMouseMovementInside_ = function(event) {
 	
 
