@@ -539,7 +539,7 @@ X.interactor.prototype.onMouseMove = function(event) {
 	this._rawDataX = null; //array of arrays
 	this._rawDataY = null;
 	this._rawDataZ = null;
-	this._image = null; //3D array
+	this._image = null;; //3D array
 	this._inaction = false; //are we in the middle of a draw action
  }
  
@@ -556,7 +556,7 @@ X.interactor.prototype.onMouseMove = function(event) {
 //holds brush data
   function Losp_Brush() {
 	this._size = 1;
-	this._colorid = 306; //blue
+	this._colorid = 3; //blue
 	this._clobber = true;
 	this._mode = 1; //1=draw, 2=2D fill, 3=3D fill
 }
@@ -587,7 +587,19 @@ X.interactor.prototype.onMouseMove = function(event) {
 
 // saves the current data so it can be restored if undo is called
 function losp_updateundo (labelmap) {
-	losp_slices._labelundo._image = labelmap._image;
+	var x_width = labelmap._dimensions[0];
+	var y_width = labelmap._dimensions[1];
+	var z_width = labelmap._dimensions[2];
+	
+	var tmp_arr = new Array(z_width);
+	for(var d=0; d<z_width; d++) {
+		tmp_arr[d] = new Array(y_width);
+		for(var e=0; e<y_width; e++) {
+			tmp_arr[d][e] = new Array(x_width);
+			for(var f=0; f<x_width; f++) {
+				tmp_arr[d][e][f] = labelmap._image[d][e][f];
+	}}}
+	losp_slices._labelundo._image = tmp_arr;
 	losp_slices._labelundo._rawDataX = new Array();
 	losp_slices._labelundo._rawDataY = new Array();
 	losp_slices._labelundo._rawDataZ = new Array();
@@ -608,10 +620,20 @@ function losp_performundo (labelmap) {
 	var x_width = labelmap._dimensions[0];
 	var y_width = labelmap._dimensions[1];
 	var z_width = labelmap._dimensions[2];
-	
+
 	//fill placeholder with real data
 	var losp_placeholder = new Losp_Slices();
-	losp_placeholder._labelundo._image = labelmap._image;
+
+	//making/copying a 3D JS array is a real pain in the butt
+	losp_placeholder._labelundo._image = new Array(z_width);
+	for(var d=0; d<z_width; d++) {
+		losp_placeholder._labelundo._image[d] = new Array(y_width);
+		for(var e=0; e<y_width; e++) {
+			losp_placeholder._labelundo._image[d][e] = new Array(x_width);
+			for(var f=0; f<x_width; f++) {
+				losp_placeholder._labelundo._image[d][e][f] = labelmap._image[d][e][f];
+	}}}
+	
 	losp_placeholder._labelundo._rawDataX = new Array();
 	losp_placeholder._labelundo._rawDataY = new Array();
 	losp_placeholder._labelundo._rawDataZ = new Array();
@@ -624,8 +646,16 @@ function losp_performundo (labelmap) {
 		losp_placeholder._labelundo._rawDataZ[i] = new Uint8Array(labelmap._slicesZ._children[i]._texture._rawData);
 	
 	//restore internal data to real
-	//labelmap._image = losp_slices._labelundo._image;
-		
+	var tmp_arr = new Array(z_width);
+	for(var d=0; d<z_width; d++) {
+		tmp_arr[d] = new Array(y_width);
+		for(var e=0; e<y_width; e++) {
+			tmp_arr[d][e] = new Array(x_width);
+			for(var f=0; f<x_width; f++) {
+				tmp_arr[d][e][f] = losp_slices._labelundo._image[d][e][f];
+	}}}
+	labelmap._image = tmp_arr;
+	
 	var i;
 	for (i=0; i<x_width; i++)
 		labelmap._slicesX._children[i]._texture._rawData = new Uint8Array(losp_slices._labelundo._rawDataX[i]);
@@ -635,7 +665,16 @@ function losp_performundo (labelmap) {
 		labelmap._slicesZ._children[i]._texture._rawData = new Uint8Array(losp_slices._labelundo._rawDataZ[i]);
 	
 	//fill internal with placeholder
-	losp_slices._labelundo._image = losp_placeholder._labelundo._image;
+	var tmp_arr2 = new Array(z_width);
+	for(var d=0; d<z_width; d++) {
+		tmp_arr2[d] = new Array(y_width);
+		for(var e=0; e<y_width; e++) {
+			tmp_arr2[d][e] = new Array(x_width);
+			for(var f=0; f<x_width; f++) {
+				tmp_arr2[d][e][f] = losp_placeholder._labelundo._image[d][e][f];
+	}}}
+	losp_slices._labelundo._image = tmp_arr2;
+	
 	var i;
 	for (i=0; i<x_width; i++)
 		losp_slices._labelundo._rawDataX[i] = new Uint8Array(losp_placeholder._labelundo._rawDataX[i]);
@@ -647,7 +686,6 @@ function losp_performundo (labelmap) {
 
 //change a 3D pixel to a new tissue of type 'id' in labelmap at (x, y, z)
 function losp_change_pixel(x, y, z, id, labelmap) {
-	
 	//find dimensions						//same as  \/
 	var x_width = labelmap._dimensions[0]; //labelmap._children[0]._children.length;
 	var y_width = labelmap._dimensions[1]; //labelmap._children[1]._children.length;
@@ -681,11 +719,12 @@ function losp_change_pixel(x, y, z, id, labelmap) {
 		losp_slices._labelundo._inaction = true;	
 	}
 	
-	
+	window.console.log("XYZ: "+x+","+y+","+z+" changed to " + id);
 	//image: this 3D array is never used but i am going to update it anyway
 	if (labelmap!= null && labelmap._image!=null && labelmap._image.length > 0) {
-		labelmap._image[z][y][x] = id;
+		volume.labelmap._image[z][y][x] = id;	
 	}
+	
 	//2D:
 	losp_2Dpixfill(labelmap._slicesX._children[x]._texture._rawData, (z*y_width+y)*4, red, green, blue, trans); //set pixel in X plane
 	losp_2Dpixfill(labelmap._slicesY._children[y]._texture._rawData, (z*x_width+x)*4, red, green, blue, trans); //Y plane
@@ -730,6 +769,99 @@ function losp_planerDot (x, y, z, view, radius, id, labelmap) {
 				losp_change_pixel(x+i, y+j, z, id, labelmap);
 			}
 		}
+		break;
+	default:
+		window.console.log('Error: invalid view.');
+	}
+}
+
+//view is 'x', 'y', or 'z', up is true or false (up means view view+1)
+function losp_copy (up, view, labelmap) {
+	//note: I have yet to copy the image3D array! worktobedone
+
+
+
+	//find dimensions						//same as  \/
+	var x_width = labelmap._dimensions[0]; //labelmap._children[0]._children.length;
+	var y_width = labelmap._dimensions[1]; //labelmap._children[1]._children.length;
+	var z_width = labelmap._dimensions[2]; //labelmap._children[2]._children.length;
+	
+	switch (view)
+	{
+	case 'x':
+		var currentSlice = losp_slices._Xslice._currentSlice;
+		var newSlice = (up) ? currentSlice+1 : currentSlice-1;
+		if ( newSlice<0 || newSlice>=x_width ) {
+			window.console.log("Error: Slice out of range");
+			return -1; //error
+		}
+		//change X plane (easy)
+		labelmap._slicesX._children[newSlice]._texture._rawData = new Uint8Array(labelmap._slicesX._children[currentSlice]._texture._rawData);
+		
+		for(var y=0; y<y_width; y++) {
+		for(var z=0; z<z_width; z++) {
+			//change Y plane (hard)
+			labelmap._slicesY._children[y]._texture._rawData[(z*x_width+newSlice)*4] =		labelmap._slicesY._children[y]._texture._rawData[(z*x_width+currentSlice)*4];
+			labelmap._slicesY._children[y]._texture._rawData[(z*x_width+newSlice)*4+1] =	labelmap._slicesY._children[y]._texture._rawData[(z*x_width+currentSlice)*4+1];
+			labelmap._slicesY._children[y]._texture._rawData[(z*x_width+newSlice)*4+2] =	labelmap._slicesY._children[y]._texture._rawData[(z*x_width+currentSlice)*4+2];
+			labelmap._slicesY._children[y]._texture._rawData[(z*x_width+newSlice)*4+3] =	labelmap._slicesY._children[y]._texture._rawData[(z*x_width+currentSlice)*4+3];	
+					
+			//change Z plane (hard)
+			labelmap._slicesZ._children[z]._texture._rawData[(y*x_width+newSlice)*4] =		labelmap._slicesZ._children[z]._texture._rawData[(y*x_width+currentSlice)*4];
+			labelmap._slicesZ._children[z]._texture._rawData[(y*x_width+newSlice)*4+1] =	labelmap._slicesZ._children[z]._texture._rawData[(y*x_width+currentSlice)*4+1];
+			labelmap._slicesZ._children[z]._texture._rawData[(y*x_width+newSlice)*4+2] =	labelmap._slicesZ._children[z]._texture._rawData[(y*x_width+currentSlice)*4+2];
+			labelmap._slicesZ._children[z]._texture._rawData[(y*x_width+newSlice)*4+3] =	labelmap._slicesZ._children[z]._texture._rawData[(y*x_width+currentSlice)*4+3];		
+		}}		
+		break;
+	case 'y':
+		var currentSlice = losp_slices._Yslice._currentSlice;
+		var newSlice = (up) ? currentSlice+1 : currentSlice-1;
+		if ( newSlice<0 || newSlice>=y_width ) {
+			window.console.log("Error: Slice out of range");
+			return -1; //error
+		}
+		//change Y plane (easy)
+		labelmap._slicesY._children[newSlice]._texture._rawData = new Uint8Array(labelmap._slicesY._children[currentSlice]._texture._rawData);
+		
+		for(var x=0; x<x_width; x++) {
+		for(var z=0; z<z_width; z++) {
+			//change X plane (hard)
+			labelmap._slicesX._children[x]._texture._rawData[(z*y_width+newSlice)*4] =		labelmap._slicesX._children[x]._texture._rawData[(z*y_width+currentSlice)*4];
+			labelmap._slicesX._children[x]._texture._rawData[(z*y_width+newSlice)*4+1] =	labelmap._slicesX._children[x]._texture._rawData[(z*y_width+currentSlice)*4+1];
+			labelmap._slicesX._children[x]._texture._rawData[(z*y_width+newSlice)*4+2] =	labelmap._slicesX._children[x]._texture._rawData[(z*y_width+currentSlice)*4+2];
+			labelmap._slicesX._children[x]._texture._rawData[(z*y_width+newSlice)*4+3] =	labelmap._slicesX._children[x]._texture._rawData[(z*y_width+currentSlice)*4+3];	
+					
+			//change Z plane (hard)
+			labelmap._slicesZ._children[z]._texture._rawData[(newSlice*x_width+x)*4] =		labelmap._slicesZ._children[z]._texture._rawData[(currentSlice*x_width+x)*4];
+			labelmap._slicesZ._children[z]._texture._rawData[(newSlice*x_width+x)*4+1] =	labelmap._slicesZ._children[z]._texture._rawData[(currentSlice*x_width+x)*4+1];
+			labelmap._slicesZ._children[z]._texture._rawData[(newSlice*x_width+x)*4+2] =	labelmap._slicesZ._children[z]._texture._rawData[(currentSlice*x_width+x)*4+2];
+			labelmap._slicesZ._children[z]._texture._rawData[(newSlice*x_width+x)*4+3] =	labelmap._slicesZ._children[z]._texture._rawData[(currentSlice*x_width+x)*4+3];		
+		}}
+		break;
+	case 'z':
+		var currentSlice = losp_slices._Zslice._currentSlice;
+		var newSlice = (up) ? currentSlice+1 : currentSlice-1;
+		if ( newSlice<0 || newSlice>=z_width ) {
+			window.console.log("Error: Slice out of range");
+			return -1; //error
+		}
+		//change Z plane (easy)
+		labelmap._slicesZ._children[newSlice]._texture._rawData = new Uint8Array(labelmap._slicesZ._children[currentSlice]._texture._rawData);
+		
+		for(var x=0; x<x_width; x++) {
+		for(var y=0; y<y_width; y++) {
+			//change X plane (hard)
+			labelmap._slicesX._children[x]._texture._rawData[(newSlice*y_width+y)*4] =		labelmap._slicesX._children[x]._texture._rawData[(currentSlice*y_width+y)*4];
+			labelmap._slicesX._children[x]._texture._rawData[(newSlice*y_width+y)*4+1] =	labelmap._slicesX._children[x]._texture._rawData[(currentSlice*y_width+y)*4+1];
+			labelmap._slicesX._children[x]._texture._rawData[(newSlice*y_width+y)*4+2] =	labelmap._slicesX._children[x]._texture._rawData[(currentSlice*y_width+y)*4+2];
+			labelmap._slicesX._children[x]._texture._rawData[(newSlice*y_width+y)*4+3] =	labelmap._slicesX._children[x]._texture._rawData[(currentSlice*y_width+y)*4+3];	
+					
+			//change Y plane (hard)
+			labelmap._slicesY._children[y]._texture._rawData[(newSlice*x_width+x)*4] =		labelmap._slicesY._children[y]._texture._rawData[(currentSlice*x_width+x)*4];
+			labelmap._slicesY._children[y]._texture._rawData[(newSlice*x_width+x)*4+1] =	labelmap._slicesY._children[y]._texture._rawData[(currentSlice*x_width+x)*4+1];
+			labelmap._slicesY._children[y]._texture._rawData[(newSlice*x_width+x)*4+2] =	labelmap._slicesY._children[y]._texture._rawData[(currentSlice*x_width+x)*4+2];
+			labelmap._slicesY._children[y]._texture._rawData[(newSlice*x_width+x)*4+3] =	labelmap._slicesY._children[y]._texture._rawData[(currentSlice*x_width+x)*4+3];	
+			}}
 		break;
 	default:
 		window.console.log('Error: invalid view.');
@@ -800,7 +932,6 @@ function losp_2D_fill(x, y, z, view, id, labelmap) {
 	//if (! (losp_checkequal(Ired, Xred, Yred, Zred) && losp_checkequal(Igreen, Xgreen, Ygreen, Zgreen) && losp_checkequal(Iblue, Xblue, Yblue, Zblue) && losp_checkequal(Itrans, Xtrans, Ytrans, Ztrans) ) ) {
 	if (! (losp_checkequal(Xred, Xred, Yred, Zred) && losp_checkequal(Xgreen, Xgreen, Ygreen, Zgreen) && losp_checkequal(Xblue, Xblue, Yblue, Zblue) && losp_checkequal(Xtrans, Xtrans, Ytrans, Ztrans) ) ) {
 		window.console.log("Error: color inconsitency");
-		debugger;
 		return -1; //error
 	}
 	
@@ -877,10 +1008,12 @@ function losp_checkimage (labelmap, percent) {
 		var Iblue =  imagecolors[3]*255.0;
 		var Itrans = imagecolors[4]*255.0;
 		
+		//this test does not look at labelmap://if (! (losp_checkequal(Xred, Xred, Yred, Zred) && losp_checkequal(Xgreen, Xgreen, Ygreen, Zgreen) && losp_checkequal(Xblue, Xblue, Yblue, Zblue) && losp_checkequal(Xtrans, Xtrans, Ytrans, Ztrans) ) ) {
 		if (! (losp_checkequal(Ired, Xred, Yred, Zred) && losp_checkequal(Igreen, Xgreen, Ygreen, Zgreen) && losp_checkequal(Iblue, Xblue, Yblue, Zblue) && losp_checkequal(Itrans, Xtrans, Ytrans, Ztrans) ) ) {
 			window.console.log("INCONSISTENCY FOUND: ("+x+", "+y+", "+z+")");
 			return;
 		}
+		
 	}}}
 	window.console.log("check complete: data consistent");
 }

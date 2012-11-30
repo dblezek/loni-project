@@ -52,9 +52,21 @@ function initializeRenderers(){
       sliceZ.render();
       
     }
-    
     setupUi();
+	/*ren3d._objects._array[301]._labelmap._rawData = null;
+    
+    window.console.log(ren3d);
+	var arr = new Array();
+	for (var i =0; i<10608; i++) arr[i]=255;
+	for (var i =0; i<648; i++) {
+		if(ren3d._objects._array[i]._labelmap!=null)
+			ren3d._objects._array[i]._labelmap._rawData = arr;
+	}
+	ren3d.render();
+    window.console.log(ren3d);
+	*/
     configurator();
+	
     
     // render();
     

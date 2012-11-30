@@ -601,6 +601,11 @@ X.volume.prototype.__defineGetter__('image', function() {
   
 });
 
+X.volume.prototype.__defineSetter__('image', function(image) {
+   this._image = image;
+  
+});
+
 
 /**
  * Get the label map of this volume. A new label map gets created if required

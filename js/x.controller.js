@@ -398,11 +398,25 @@ function toggleCopyOption() {
 	if (!volume) {
 		return;
 	}
-
+debugger;
 	// TODO: Need to redo
 
 	var e = document.getElementById('copyPasteOption');
 	var selectedView = e.options[e.selectedIndex].value;
+	switch(selectedView)
+	{
+	case 'yellow':
+	  losp_copy (true, 'x', volume._labelmap);
+	  break;
+	case 'red':
+	  losp_copy (true, 'y', volume._labelmap);
+	  break;
+	case 'green':
+	  losp_copy (true, 'z', volume._labelmap);
+	  break;
+	default:
+	  window.console.log("Error: selected plane not recognized");
+	}
 	// yellow, red or green
 
 	//window.console.log('copy: ' + selectedView);
