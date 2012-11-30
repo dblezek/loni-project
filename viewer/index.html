@@ -218,6 +218,8 @@
 							  <option value="4">4</option>
 							  <option value="5">5</option>
 							</select>
+							<br/>
+							<b>Eraser: </b><input id="eraserOption" type="checkbox"/>
 
 						</div>
 						<div id='optionTab' class='tabContent' style='display: none'>
@@ -244,9 +246,9 @@
 							
 							<button type="button" id="copyNext">Copy to Next</button>	
 							<select id="copyPasteOption">
-							  <option value="yellow">Yellow</option>
-							  <option value="red">Red</option>
-							  <option value="green">Green</option>
+							  <option value="yellow">Sagittal</option>
+							  <option value="red">Coronal</option>
+							  <option value="green">Axial</option>
 							</select>
 							<br/>
 							<button type="button" id="copyPrev">Copy to Previous</button>
@@ -340,11 +342,20 @@
 		<div id='sliceX' class='twoDRenderer' style='top: 0%;'>
 			<div id='yellow_slider'></div>
 		</div>
+		<div id='sliceXNum' class='twoDRenderer' style='top: 30%;'>
+			
+		</div>
 		<div id='sliceY' class='twoDRenderer' style='top: 33.333%;'>
 			<div id='red_slider'></div>
 		</div>
+		<div id='sliceYNum' class='twoDRenderer' style='top: 63.333%;'>
+			
+		</div>
 		<div id='sliceZ' class='twoDRenderer' style='top: 66.666%;'>
 			<div id='green_slider'></div>
+		</div>
+		<div id='sliceZNum' class='twoDRenderer' style='top: 96.666%;'>
+			
 		</div>
 
 		<div id='blacklogo'>

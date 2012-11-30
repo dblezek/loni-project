@@ -170,7 +170,12 @@ function setupUi() {
 	elem.style.backgroundColor = "rgba(" + red + "," + green + "," + blue + "," + trans + ")";
 	document.getElementById("labelName").innerHTML = name;
 
-  
+
+	// TODO: Set up slice number
+	document.getElementById('sliceXNum').innerHTML = "Sagittal (Yellow) Slide Number: " + Math.floor(losp_slices._Xslice._currentSlice);
+	document.getElementById('sliceYNum').innerHTML = "Coronal (Red) Slide Number: " + Math.floor(losp_slices._Yslice._currentSlice);
+	document.getElementById('sliceZNum').innerHTML = "Axial (Green) Slide Number: " + Math.floor(losp_slices._Zslice._currentSlice); 
+
 }
 
 function volumerenderingOnOff(bool) {
@@ -228,6 +233,9 @@ function volumeslicingX(event, ui) {
   volume.indexX = Math
       .floor(jQuery('#yellow_slider').slider("option", "value"));
   
+  // TODO: added
+  document.getElementById('sliceXNum').innerHTML = "Sagittal (Yellow) Slide Number: " 
+  	+ Math.floor(losp_slices._Xslice._currentSlice);
 }
 
 function volumeslicingY(event, ui) {
@@ -238,6 +246,9 @@ function volumeslicingY(event, ui) {
   
   volume.indexY = Math.floor(jQuery('#red_slider').slider("option", "value"));
   
+  // TODO: added
+  document.getElementById('sliceYNum').innerHTML = "Coronal (Red) Slide Number: " 
+  	+ Math.floor(losp_slices._Yslice._currentSlice);
 }
 
 function volumeslicingZ(event, ui) {
@@ -248,6 +259,9 @@ function volumeslicingZ(event, ui) {
   
   volume.indexZ = Math.floor(jQuery('#green_slider').slider("option", "value"));
   
+  // TODO: added
+  document.getElementById('sliceZNum').innerHTML = "Axial (Green) Slide Number: " 
+  	+ Math.floor(losp_slices._Zslice._currentSlice);
 }
 
 function fgColorVolume(hex, rgb) {
@@ -342,6 +356,20 @@ function paintBrushSize() {
 	var e = document.getElementById('paintBrushSize');
 	var selectedView = e.options[e.selectedIndex].value;
 	losp_slices._brush._size = selectedView;
+}
+
+function eraserOption() {
+	
+	if (!volume) {
+		return;
+	}
+	
+	if ($('#eraserOption').prop('checked')) {
+		losp_slices._brush._eraser = true;
+	} else {
+		losp_slices._brush._eraser = false;
+	}
+	window.console.log(renderer2D._s);
 }
 
 function toggleUndoOption() {

@@ -109,6 +109,10 @@ jQuery(function() {
   	toggleUndoOption();
   });
   
+  jQuery('#eraserOption').click(function() {
+  	eraserOption();
+  });
+  
   // jQuery('#redoOption').click(function() {
   	// toggleRedoOption();
   // });

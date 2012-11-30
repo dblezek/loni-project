@@ -567,6 +567,7 @@ X.interactor.prototype.onMouseMove = function(event) {
 	this._colorid = 306; //blue
 	this._clobber = true;
 	this._mode = 1; //1=draw, 2=2D fill, 3=3D fill
+	this._eraser = false;
 }
 
 //holds undo and slice data
@@ -675,7 +676,12 @@ function losp_change_pixel(x, y, z, id, labelmap) {
 		return -1; //error
 	}
 	
-	//look up red, blue, green from colormapping	
+	// Check if eraser option set
+	if (losp_slices._brush._eraser) {
+		id = 0; // Set color id to none
+	}
+	
+	//look up red, blue, green from colormapping
 	var colors = labelmap._colortable._map.get(id);
 	var name =  colors[0];
 	var red =   colors[1]*255.0;
@@ -694,6 +700,7 @@ function losp_change_pixel(x, y, z, id, labelmap) {
 	if (labelmap!= null && labelmap._image!=null && labelmap._image.length > 0) {
 		labelmap._image[z][y][x] = id;
 	}
+	
 	//2D:
 	losp_2Dpixfill(labelmap._slicesX._children[x]._texture._rawData, (z*y_width+y)*4, red, green, blue, trans); //set pixel in X plane
 	losp_2Dpixfill(labelmap._slicesY._children[y]._texture._rawData, (z*x_width+x)*4, red, green, blue, trans); //Y plane
