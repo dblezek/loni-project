@@ -608,8 +608,8 @@ X.volume.prototype.__defineGetter__('image', function() {
 X.volume.prototype.__defineSetter__('image', function(image) {
 	
 	this._image = image;
-	this.labelmap.modified();
-	window.console.log('image setter called');
+	// this.labelmap.modified();
+	// window.console.log('image setter called');
 	//this.modified(true);	
 });
 

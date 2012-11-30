@@ -109,13 +109,13 @@ jQuery(function() {
   	toggleUndoOption();
   });
   
+  jQuery('#redoOption').click(function() {
+  	toggleRedoOption();
+  });
+  
   jQuery('#eraserOption').click(function() {
   	eraserOption();
   });
-  
-  // jQuery('#redoOption').click(function() {
-  	// toggleRedoOption();
-  // });
   
   // jQuery('#colorOption').miniColors({
     // opacity: 'true',

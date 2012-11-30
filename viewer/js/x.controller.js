@@ -174,7 +174,12 @@ function setupUi() {
 	// TODO: Set up slice number
 	document.getElementById('sliceXNum').innerHTML = "Sagittal (Yellow) Slide Number: " + Math.floor(losp_slices._Xslice._currentSlice);
 	document.getElementById('sliceYNum').innerHTML = "Coronal (Red) Slide Number: " + Math.floor(losp_slices._Yslice._currentSlice);
-	document.getElementById('sliceZNum').innerHTML = "Axial (Green) Slide Number: " + Math.floor(losp_slices._Zslice._currentSlice); 
+	document.getElementById('sliceZNum').innerHTML = "Axial (Green) Slide Number: " + Math.floor(losp_slices._Zslice._currentSlice);
+	
+	// TODO: Set initial paint brush size
+	var e = document.getElementById('paintBrushSize');
+	var selectedView = e.options[e.selectedIndex].value;
+	losp_slices._brush._size = selectedView;
 
 }
 
@@ -379,28 +384,27 @@ function toggleUndoOption() {
 	}
 
 	// TODO: Need to undo
-	var cur = document.getElementById('undoOption');
+	// var cur = document.getElementById('undoOption');
+// 	
+	// if (cur.innerHTML == 'Undo') {
+		// cur.innerHTML = 'Redo';
+	// } else {
+		// cur.innerHTML = 'Undo';
+	// }
 	
-	if (cur.innerHTML == 'Undo') {
-		cur.innerHTML = 'Redo';
-	} else {
-		cur.innerHTML = 'Undo';
-	}
-	
-	losp_performundo(volume._labelmap);
-	losp_checkimage(volume._labelmap);
-	//window.console.log('undo');
+	losp_performUndoRedo('U', volume._labelmap);
+	//losp_performundo(volume._labelmap);
+	//losp_checkimage(volume._labelmap);
 }
 
-// function toggleRedoOption() {
-// 
-	// if (!volume) {
-		// return;
-	// }
-// 
-	// // TODO: Need to redo
-	// //window.console.log('redo');
-// }
+function toggleRedoOption() {
+
+	if (!volume) {
+		return;
+	}
+
+	losp_performUndoRedo('R', volume._labelmap);
+}
 
 // function colorOption(hex, rgba) {
 // 
@@ -513,8 +517,20 @@ function copyNextOption() {
 	var e = document.getElementById('copyPasteOption');
 	var selectedView = e.options[e.selectedIndex].value;
 	// yellow, red or green
-
-	//window.console.log('copy: ' + selectedView);
+	
+	switch(selectedView) {
+		case 'yellow':
+			losp_copy(true, 'x', volume._labelmap);
+			break;
+		case 'red':
+			losp_copy(true, 'y', volume._labelmap);
+			break;
+		case 'green':
+			losp_copy(true, 'z', volume._labelmap);
+			break;
+		default:
+			window.console.log("Error: selected plane not recognized");
+	}
 }
 
 function copyPrevOption() {
@@ -529,7 +545,19 @@ function copyPrevOption() {
 	var selectedView = e.options[e.selectedIndex].value;
 	// yellow, red or green
 
-	//window.console.log('paste: ' + selectedView);
+	switch(selectedView) {
+		case 'yellow':
+			losp_copy(false, 'x', volume._labelmap);
+			break;
+		case 'red':
+			losp_copy(false, 'y', volume._labelmap);
+			break;
+		case 'green':
+			losp_copy(false, 'z', volume._labelmap);
+			break;
+		default:
+			window.console.log("Error: selected plane not recognized");
+	}
 }
 
 
