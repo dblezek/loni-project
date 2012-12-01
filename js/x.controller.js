@@ -398,7 +398,6 @@ function toggleCopyOption() {
 	if (!volume) {
 		return;
 	}
-debugger;
 	// TODO: Need to redo
 
 	var e = document.getElementById('copyPasteOption');

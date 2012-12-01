@@ -412,8 +412,12 @@ X.interactor.prototype.onMouseDown = function(left, middle, right) {
  * @protected
  */
 X.interactor.prototype.onMouseUp_ = function(event) {
-  //losp: any action is complete
-  losp_slices._labelundo._inaction = false;
+	if (!losp_slices._labelundo._inaction) {//has NOT been drawing, just a click
+		debugger;
+		losp_MouseMove(this._id, false); //false means not a drag, just a click
+	}
+	//all actions are complete
+	losp_slices._labelundo._inaction = false;
 	
   if (event.button == goog.events.BrowserEvent.MouseButton.LEFT) {
     
@@ -539,7 +543,7 @@ X.interactor.prototype.onMouseMove = function(event) {
 	this._rawDataX = null; //array of arrays
 	this._rawDataY = null;
 	this._rawDataZ = null;
-	this._image = null;; //3D array
+	this._image = null; //3D array
 	this._inaction = false; //are we in the middle of a draw action
  }
  
@@ -715,14 +719,14 @@ function losp_change_pixel(x, y, z, id, labelmap) {
 	
 	
 	if (!losp_slices._labelundo._inaction) {
-		losp_updateundo(labelmap);
 		losp_slices._labelundo._inaction = true;	
+		losp_updateundo(labelmap);
 	}
 	
 	window.console.log("XYZ: "+x+","+y+","+z+" changed to " + id);
 	//image: this 3D array is never used but i am going to update it anyway
 	if (labelmap!= null && labelmap._image!=null && labelmap._image.length > 0) {
-		volume.labelmap._image[z][y][x] = id;	
+		labelmap._image[z][y][x] = id;	
 	}
 	
 	//2D:
@@ -1018,103 +1022,105 @@ function losp_checkimage (labelmap, percent) {
 	window.console.log("check complete: data consistent");
 }
 
-
-
-X.interactor.prototype.onMouseMovementInside_ = function(event) {
-	
-
-if (this instanceof X.interactor2D && this._leftButtonDown) {
-	
-	var slicedata = null;
-	var view = null;
-	switch (this._id)
-	{
-	case 10:
-		slicedata = losp_slices._Xslice;
-		view = 'x';
-	  break;
-	case 17:
-		slicedata = losp_slices._Yslice;
-		view = 'y';
-	  break;
-	case 24:
-		slicedata = losp_slices._Zslice;
-		view = 'z';
-	  break;
-	default:
-	  window.console.log('Error: bad _camera._id');
-	}
-	
-	var _paintX = event.offsetX;
-	var _paintY = event.offsetY;
-	
-	
-  var _paintSliceX = 0;
-  var _paintSliceY = 0;
-  
-  if (_paintX * _paintY > 0) {
-
-  	var _sliceRatio = slicedata._sliceWidth/slicedata._sliceHeight;
-  	var _viewRatio = slicedata._width/slicedata._height;
-    
-  	if (_viewRatio < _sliceRatio) {
-  		// letter boxed with black regions on top and bottom
-  		var _zoomRatio = slicedata._sliceWidth / slicedata._width;
-  		var _zoomedSliceHeight = slicedata._sliceHeight / _zoomRatio;
-  		var _margin = (slicedata._height - _zoomedSliceHeight)/2;
-  		_paintSliceY = _paintY - _margin;
-  		_paintSliceY = _paintSliceY * _zoomRatio;
-  		_paintSliceX = _paintX * _zoomRatio;
-  	} else {
-  		// letter boxed with black regions on sides
-  		var _zoomRatio = slicedata._sliceHeight / slicedata._height;
-  		var _zoomedSliceWidth = slicedata._sliceWidth / _zoomRatio;
-  		var _margin = (slicedata._width - _zoomedSliceWidth)/2;
-  		_paintSliceX = _paintX - _margin;
-  		_paintSliceX = _paintSliceX * _zoomRatio;
-  		_paintSliceY = _paintY * _zoomRatio;
-  	}
-  	
-  	if (_paintSliceX * _paintSliceY > 0) {
-  		_paintSliceX = Math.floor(_paintSliceX+0.5);
-  		_paintSliceY = Math.floor(_paintSliceY+0.5);
-		_paintSliceZ = Math.floor(slicedata._currentSlice+0.49);
+//the main function call, gets called in onMouseMovementInside(drag=true) AND onMouseUp(drag=false)
+function losp_MouseMove(id, drag) {
 		
-		//losp
-		//find dimensions						//same as  \/
-		var x_width = volume._labelmap._dimensions[0]; //labelmap._children[0]._children.length;
-		var y_width = volume._labelmap._dimensions[1]; //labelmap._children[1]._children.length;
-		var z_width = volume._labelmap._dimensions[2]; //labelmap._children[2]._children.length;
-		//*
-		
-		var xx, yy, zz, plane;
-		switch (view)
+		var slicedata = null;
+		var view = null;
+		switch (id)
 		{
-		case 'x':
-			x = _paintSliceZ
-			y = y_width - _paintSliceX;
-			z = z_width - _paintSliceY;
+		case 10:
+			slicedata = losp_slices._Xslice;
+			view = 'x';
 		  break;
-		case 'y':
-			x = x_width - _paintSliceX;
-			y = _paintSliceZ;
-			z = z_width - _paintSliceY;
+		case 17:
+			slicedata = losp_slices._Yslice;
+			view = 'y';
 		  break;
-		case 'z':
-			x = x_width - _paintSliceX;
-			y = y_width - _paintSliceY;
-			z = _paintSliceZ;
+		case 24:
+			slicedata = losp_slices._Zslice;
+			view = 'z';
 		  break;
 		default:
 		  window.console.log('Error: bad _camera._id');
 		}
-		if (losp_slices._brush._mode == 1)
-			losp_planerDot(x, y, z, view, losp_slices._brush._size, losp_slices._brush._colorid, volume._labelmap);
-		else
-			losp_2D_fill(x, y, z, view, losp_slices._brush._colorid, volume._labelmap);
-  	}
-  }										
+		
+		var _paintX = event.offsetX;
+		var _paintY = event.offsetY;
+		
+		
+	  var _paintSliceX = 0;
+	  var _paintSliceY = 0;
+	  
+	  if (_paintX * _paintY > 0) {
+
+		var _sliceRatio = slicedata._sliceWidth/slicedata._sliceHeight;
+		var _viewRatio = slicedata._width/slicedata._height;
+		
+		if (_viewRatio < _sliceRatio) {
+			// letter boxed with black regions on top and bottom
+			var _zoomRatio = slicedata._sliceWidth / slicedata._width;
+			var _zoomedSliceHeight = slicedata._sliceHeight / _zoomRatio;
+			var _margin = (slicedata._height - _zoomedSliceHeight)/2;
+			_paintSliceY = _paintY - _margin;
+			_paintSliceY = _paintSliceY * _zoomRatio;
+			_paintSliceX = _paintX * _zoomRatio;
+		} else {
+			// letter boxed with black regions on sides
+			var _zoomRatio = slicedata._sliceHeight / slicedata._height;
+			var _zoomedSliceWidth = slicedata._sliceWidth / _zoomRatio;
+			var _margin = (slicedata._width - _zoomedSliceWidth)/2;
+			_paintSliceX = _paintX - _margin;
+			_paintSliceX = _paintSliceX * _zoomRatio;
+			_paintSliceY = _paintY * _zoomRatio;
+		}
+		
+		if (_paintSliceX * _paintSliceY > 0) {
+			_paintSliceX = Math.floor(_paintSliceX+0.5);
+			_paintSliceY = Math.floor(_paintSliceY+0.5);
+			_paintSliceZ = Math.floor(slicedata._currentSlice+0.49);
+			
+			//losp
+			//find dimensions						//same as  \/
+			var x_width = volume._labelmap._dimensions[0]; //labelmap._children[0]._children.length;
+			var y_width = volume._labelmap._dimensions[1]; //labelmap._children[1]._children.length;
+			var z_width = volume._labelmap._dimensions[2]; //labelmap._children[2]._children.length;
+			//*
+			
+			var xx, yy, zz, plane;
+			switch (view)
+			{
+			case 'x':
+				x = _paintSliceZ
+				y = y_width - _paintSliceX;
+				z = z_width - _paintSliceY;
+			  break;
+			case 'y':
+				x = x_width - _paintSliceX;
+				y = _paintSliceZ;
+				z = z_width - _paintSliceY;
+			  break;
+			case 'z':
+				x = x_width - _paintSliceX;
+				y = y_width - _paintSliceY;
+				z = _paintSliceZ;
+			  break;
+			default:
+			  window.console.log('Error: bad _camera._id');
+			}
+			if (losp_slices._brush._mode == 1) //paint
+				losp_planerDot(x, y, z, view, losp_slices._brush._size, losp_slices._brush._colorid, volume._labelmap);
+			else if (losp_slices._brush._mode==2 && !drag)//2D fill
+				losp_2D_fill(x, y, z, view, losp_slices._brush._colorid, volume._labelmap);
+		}
+	}										
 }
+
+X.interactor.prototype.onMouseMovementInside_ = function(event) {
+	if (this instanceof X.interactor2D && this._leftButtonDown) {
+		losp_MouseMove(this._id, true);
+	}
+
 	
   this['mousemoveEvent'] = event; // we need to buffer the event to run eval in
   // advanced compilation
