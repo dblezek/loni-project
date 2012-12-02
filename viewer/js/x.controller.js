@@ -150,7 +150,7 @@ function setupUi() {
     
   }
   
-  	// TODO: Set up initial color
+  	// Set up initial color
 	var elem = document.getElementById('colorId');
 	elem.value = losp_slices._brush._colorid;
 
@@ -171,16 +171,18 @@ function setupUi() {
 	document.getElementById("labelName").innerHTML = name;
 
 
-	// TODO: Set up slice number
+	// Set up slice number
 	document.getElementById('sliceXNum').innerHTML = "Sagittal (Yellow) Slide Number: " + Math.floor(losp_slices._Xslice._currentSlice);
 	document.getElementById('sliceYNum').innerHTML = "Coronal (Red) Slide Number: " + Math.floor(losp_slices._Yslice._currentSlice);
 	document.getElementById('sliceZNum').innerHTML = "Axial (Green) Slide Number: " + Math.floor(losp_slices._Zslice._currentSlice);
 	
-	// TODO: Set initial paint brush size
+	// Set initial paint brush size
 	var e = document.getElementById('paintBrushSize');
 	var selectedView = e.options[e.selectedIndex].value;
 	losp_slices._brush._size = selectedView;
 
+	// Initialize undo stack
+ 	losp_addUndoRedo('U', volume._labelmap);
 }
 
 function volumerenderingOnOff(bool) {
@@ -238,7 +240,7 @@ function volumeslicingX(event, ui) {
   volume.indexX = Math
       .floor(jQuery('#yellow_slider').slider("option", "value"));
   
-  // TODO: added
+  // For showing current slide number
   document.getElementById('sliceXNum').innerHTML = "Sagittal (Yellow) Slide Number: " 
   	+ Math.floor(losp_slices._Xslice._currentSlice);
 }
@@ -251,7 +253,7 @@ function volumeslicingY(event, ui) {
   
   volume.indexY = Math.floor(jQuery('#red_slider').slider("option", "value"));
   
-  // TODO: added
+  // For showing current slide number
   document.getElementById('sliceYNum').innerHTML = "Coronal (Red) Slide Number: " 
   	+ Math.floor(losp_slices._Yslice._currentSlice);
 }
@@ -264,7 +266,7 @@ function volumeslicingZ(event, ui) {
   
   volume.indexZ = Math.floor(jQuery('#green_slider').slider("option", "value"));
   
-  // TODO: added
+  // For showing current slide number
   document.getElementById('sliceZNum').innerHTML = "Axial (Green) Slide Number: " 
   	+ Math.floor(losp_slices._Zslice._currentSlice);
 }
@@ -374,7 +376,7 @@ function eraserOption() {
 	} else {
 		losp_slices._brush._eraser = false;
 	}
-	window.console.log(renderer2D._s);
+	
 }
 
 function toggleUndoOption() {
@@ -383,18 +385,13 @@ function toggleUndoOption() {
 		return;
 	}
 
-	// TODO: Need to undo
-	// var cur = document.getElementById('undoOption');
-// 	
-	// if (cur.innerHTML == 'Undo') {
-		// cur.innerHTML = 'Redo';
-	// } else {
-		// cur.innerHTML = 'Undo';
-	// }
+	// Need to call function twice if boolean true
+	if (losp_slices._undoRedo._first) {
+		losp_performUndoRedo('U', volume._labelmap);
+		losp_slices._undoRedo._first = false;
+	}
 	
 	losp_performUndoRedo('U', volume._labelmap);
-	//losp_performundo(volume._labelmap);
-	//losp_checkimage(volume._labelmap);
 }
 
 function toggleRedoOption() {
@@ -404,6 +401,7 @@ function toggleRedoOption() {
 	}
 
 	losp_performUndoRedo('R', volume._labelmap);
+	losp_slices._undoRedo._first = false;
 }
 
 // function colorOption(hex, rgba) {
@@ -417,49 +415,12 @@ function toggleRedoOption() {
 // 
 // }
 
-// function toggleBrushSmallOption() {
-// 
-	// if (!volume) {
-		// return;
-	// }
-// 
-	// // TODO: Need to make default cursor size
-	// document.body.style.cursor = 'default';
-	// volume._brushSize = 1;
-	// //window.console.log('small');
-// }
-// 
-// function toggleBrushMediumOption() {
-// 
-	// if (!volume) {
-		// return;
-	// }
-// 
-	// // TODO: Need to make medium cursor size
-	// document.body.style.cursor = "url('../gfx/medium.png'), default";
-	// volume._brushSize = 5;
-	// //window.console.log('medium');
-// }
-// 
-// function toggleBrushLargeOption() {
-// 
-	// if (!volume) {
-		// return;
-	// }
-// 
-	// // TODO: Need to make large cursor size
-	// document.body.style.cursor = "url('../gfx/large.png'), default";
-	// volume._brushSize = 10;
-	// //window.console.log('large');
-// }
-
 function toggleClobberOption() {
 
 	if (!volume) {
 		return;
 	}
 
-	// TODO: Need to set clobber variable
 	if ($('#clobberOption').prop('checked')) {
 		losp_slices._brush._clobber = true;
 	} else {
@@ -512,25 +473,33 @@ function copyNextOption() {
 		return;
 	}
 
-	// TODO: Need to redo
-
 	var e = document.getElementById('copyPasteOption');
 	var selectedView = e.options[e.selectedIndex].value;
 	// yellow, red or green
 	
+	var retVal = null;
+	
 	switch(selectedView) {
 		case 'yellow':
-			losp_copy(true, 'x', volume._labelmap);
+			retVal = losp_copy(true, 'x', volume._labelmap, 0);
 			break;
 		case 'red':
-			losp_copy(true, 'y', volume._labelmap);
+			retVal = losp_copy(true, 'y', volume._labelmap, 0);
 			break;
 		case 'green':
-			losp_copy(true, 'z', volume._labelmap);
+			retVal = losp_copy(true, 'z', volume._labelmap, 0);
 			break;
 		default:
 			window.console.log("Error: selected plane not recognized");
+			break;
 	}
+	
+	if (retVal != null) {
+		document.getElementById('functionMessage').innerHTML = 'Copied to slice # ' + retVal;
+	} else {
+		document.getElementById('functionMessage').innerHTML = 'Copy unsuccessful';
+	}
+	
 }
 
 function copyPrevOption() {
@@ -539,27 +508,77 @@ function copyPrevOption() {
 		return;
 	}
 
-	// TODO: Need to redo
-
 	var e = document.getElementById('copyPasteOption');
 	var selectedView = e.options[e.selectedIndex].value;
 	// yellow, red or green
+	
+	var retVal = null;
 
 	switch(selectedView) {
 		case 'yellow':
-			losp_copy(false, 'x', volume._labelmap);
+			retVal = losp_copy(false, 'x', volume._labelmap, 0);
 			break;
 		case 'red':
-			losp_copy(false, 'y', volume._labelmap);
+			retVal = losp_copy(false, 'y', volume._labelmap, 0);
 			break;
 		case 'green':
-			losp_copy(false, 'z', volume._labelmap);
+			retVal = losp_copy(false, 'z', volume._labelmap, 0);
 			break;
 		default:
 			window.console.log("Error: selected plane not recognized");
+			break;
 	}
+	
+	if (retVal != null) {
+		document.getElementById('functionMessage').innerHTML = 'Copied to slice # ' + retVal;
+	} else {
+		document.getElementById('functionMessage').innerHTML = 'Copy unsuccessful';
+	}
+	
 }
 
+function sliceNumOption(e) {
+	
+	if (!volume) {
+		return;
+	}
+	
+	// keyCode 13 is Enter key
+	if (e.keyCode == 13) {
+		
+		var elem = document.getElementById('sliceNum');
+		var slice = elem.value;
+		
+		var e = document.getElementById('copyPasteOption');
+		var selectedView = e.options[e.selectedIndex].value;
+		// yellow, red or green
+	
+		var retVal = null;
+	
+		switch(selectedView) {
+			case 'yellow':
+				retVal = losp_copy(false, 'x', volume._labelmap, slice);
+				break;
+			case 'red':
+				retVal = losp_copy(false, 'y', volume._labelmap, slice);
+				break;
+			case 'green':
+				retVal = losp_copy(false, 'z', volume._labelmap, slice);
+				break;
+			default:
+				window.console.log("Error: selected plane not recognized");
+				break;
+		}
+		
+		if (retVal != null) {
+			document.getElementById('functionMessage').innerHTML = 'Copied to slice # ' + retVal;
+		} else {
+			document.getElementById('functionMessage').innerHTML = 'Copy unsuccessful';
+		}
+		
+		elem.value = ''; // Change input to blank after done
+	}
+}
 
 /////////////////////////////////////////////
 // TODO: end of added functions

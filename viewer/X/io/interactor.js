@@ -361,16 +361,6 @@ X.interactor.prototype.init = function() {
  */
 X.interactor.prototype.onMouseDown_ = function(event) {
 
-  // TODO: to disable paint bucket (only when 2d bucket or 3d bucket being used)
-  // if ($('#2dBucketOption').prop("checked") || $('#3dBucketOption').prop("checked")) {
-  	// // Disable checkbox once paint bucket function used
-  	// $('#2dBucketOption').prop("checked", false);
-  	// $('#3dBucketOption').prop("checked", false);
-//   	
-  	// // Turn the cursor back to the normal state
-  	// document.body.style.cursor='default';
-  // }
-
   if (event.button == goog.events.BrowserEvent.MouseButton.LEFT) {
     
     // left button click
@@ -423,9 +413,12 @@ X.interactor.prototype.onMouseDown = function(left, middle, right) {
  */
 X.interactor.prototype.onMouseUp_ = function(event) {
 	
-  // TODO: added function
-  while (losp_slices._undoRedo._redo.pop() != null);
-  losp_addUndoRedo('U', volume._labelmap);
+	// if (!losp_slices._labelundo._inaction) {//has NOT been drawing, just a click
+		// debugger;
+		// losp_MouseMove(this._id, false); //false means not a drag, just a click
+	// }
+	// //all actions are complete
+	// losp_slices._labelundo._inaction = false;
 
   if (event.button == goog.events.BrowserEvent.MouseButton.LEFT) {
     
@@ -487,9 +480,12 @@ X.interactor.prototype.__defineGetter__('mousePosition', function() {
  * @param {boolean} right TRUE if the right button triggered this event.
  */
 X.interactor.prototype.onMouseUp = function(left, middle, right) {
-
-  // do nothing
-  
+	
+	// For undo/redo function
+	losp_slices._undoRedo._first = true;
+	while (losp_slices._undoRedo._redo.pop() != null);
+	losp_addUndoRedo('U', volume._labelmap);
+	
 };
 
 
@@ -577,6 +573,8 @@ X.interactor.prototype.onMouseMove = function(event) {
 function Losp_UndoRedo() {
 	this._undo = new Array();
 	this._redo = new Array();
+	this._first = true; // Determines whether undo needs to be executed twice (hack)
+						// True means needs hack
 }
 
 //holds undo and slice data
@@ -629,6 +627,7 @@ function losp_addUndoRedo(type, labelmap) {
 	} else {
 		losp_slices._undoRedo._redo.push(add);
 	}
+	
 }
 
 // type = R for redo or U for undo
@@ -644,7 +643,8 @@ function losp_performUndoRedo(type, labelmap) {
 		losp_addUndoRedo('R', labelmap);
 		saveArray = losp_slices._undoRedo._undo.pop();
 	} else {
-		if (losp_slices._undoRedo._redo.length < 1) {
+		if (losp_slices._undoRedo._redo.length < 2) {
+			// Becuase last redo redundant
 			return;
 		}
 		
@@ -663,107 +663,107 @@ function losp_performUndoRedo(type, labelmap) {
 		labelmap._slicesY._children[i]._texture._rawData = new Uint8Array(saveArray._rawDataY[i]);
 	for (i=0; i<z_width; i++)
 		labelmap._slicesZ._children[i]._texture._rawData = new Uint8Array(saveArray._rawDataZ[i]);
-		
+
 }
 
-// saves the current data so it can be restored if undo is called
-function losp_updateundo (labelmap) {
-	var x_width = labelmap._dimensions[0];
-	var y_width = labelmap._dimensions[1];
-	var z_width = labelmap._dimensions[2];
-	
-	var tmp_arr = new Array(z_width);
-	for(var d=0; d<z_width; d++) {
-		tmp_arr[d] = new Array(y_width);
-		for(var e=0; e<y_width; e++) {
-			tmp_arr[d][e] = new Array(x_width);
-			for(var f=0; f<x_width; f++) {
-				tmp_arr[d][e][f] = labelmap._image[d][e][f];
-	}}}
-	losp_slices._labelundo._image = tmp_arr;
-	losp_slices._labelundo._rawDataX = new Array();
-	losp_slices._labelundo._rawDataY = new Array();
-	losp_slices._labelundo._rawDataZ = new Array();
-	var x_width = labelmap._dimensions[0];
-	var y_width = labelmap._dimensions[1];
-	var z_width = labelmap._dimensions[2];
-	var i;
-	for (i=0; i<x_width; i++)
-		losp_slices._labelundo._rawDataX[i] = new Uint8Array(labelmap._slicesX._children[i]._texture._rawData);
-	for (i=0; i<y_width; i++)
-		losp_slices._labelundo._rawDataY[i] = new Uint8Array(labelmap._slicesY._children[i]._texture._rawData);
-	for (i=0; i<z_width; i++)
-		losp_slices._labelundo._rawDataZ[i] = new Uint8Array(labelmap._slicesZ._children[i]._texture._rawData);
-}
-
-//restores the undo data
-function losp_performundo (labelmap) {
-	var x_width = labelmap._dimensions[0];
-	var y_width = labelmap._dimensions[1];
-	var z_width = labelmap._dimensions[2];
-
-	//fill placeholder with real data
-	var losp_placeholder = new Losp_Slices();
-
-	//making/copying a 3D JS array is a real pain in the butt
-	losp_placeholder._labelundo._image = new Array(z_width);
-	for(var d=0; d<z_width; d++) {
-		losp_placeholder._labelundo._image[d] = new Array(y_width);
-		for(var e=0; e<y_width; e++) {
-			losp_placeholder._labelundo._image[d][e] = new Array(x_width);
-			for(var f=0; f<x_width; f++) {
-				losp_placeholder._labelundo._image[d][e][f] = labelmap._image[d][e][f];
-	}}}
-	
-	losp_placeholder._labelundo._rawDataX = new Array();
-	losp_placeholder._labelundo._rawDataY = new Array();
-	losp_placeholder._labelundo._rawDataZ = new Array();
-	var i;
-	for (i=0; i<x_width; i++)
-		losp_placeholder._labelundo._rawDataX[i] = new Uint8Array(labelmap._slicesX._children[i]._texture._rawData);
-	for (i=0; i<y_width; i++)
-		losp_placeholder._labelundo._rawDataY[i] = new Uint8Array(labelmap._slicesY._children[i]._texture._rawData);
-	for (i=0; i<z_width; i++)
-		losp_placeholder._labelundo._rawDataZ[i] = new Uint8Array(labelmap._slicesZ._children[i]._texture._rawData);
-	
-	//restore internal data to real
-	var tmp_arr = new Array(z_width);
-	for(var d=0; d<z_width; d++) {
-		tmp_arr[d] = new Array(y_width);
-		for(var e=0; e<y_width; e++) {
-			tmp_arr[d][e] = new Array(x_width);
-			for(var f=0; f<x_width; f++) {
-				tmp_arr[d][e][f] = losp_slices._labelundo._image[d][e][f];
-	}}}
-	labelmap._image = tmp_arr;
-	
-	var i;
-	for (i=0; i<x_width; i++)
-		labelmap._slicesX._children[i]._texture._rawData = new Uint8Array(losp_slices._labelundo._rawDataX[i]);
-	for (i=0; i<y_width; i++)
-		labelmap._slicesY._children[i]._texture._rawData = new Uint8Array(losp_slices._labelundo._rawDataY[i]);
-	for (i=0; i<z_width; i++)
-		labelmap._slicesZ._children[i]._texture._rawData = new Uint8Array(losp_slices._labelundo._rawDataZ[i]);
-	
-	//fill internal with placeholder
-	var tmp_arr2 = new Array(z_width);
-	for(var d=0; d<z_width; d++) {
-		tmp_arr2[d] = new Array(y_width);
-		for(var e=0; e<y_width; e++) {
-			tmp_arr2[d][e] = new Array(x_width);
-			for(var f=0; f<x_width; f++) {
-				tmp_arr2[d][e][f] = losp_placeholder._labelundo._image[d][e][f];
-	}}}
-	losp_slices._labelundo._image = tmp_arr2;
-	
-	var i;
-	for (i=0; i<x_width; i++)
-		losp_slices._labelundo._rawDataX[i] = new Uint8Array(losp_placeholder._labelundo._rawDataX[i]);
-	for (i=0; i<y_width; i++)
-		losp_slices._labelundo._rawDataY[i] = new Uint8Array(losp_placeholder._labelundo._rawDataY[i]);
-	for (i=0; i<z_width; i++)
-		losp_slices._labelundo._rawDataZ[i] = new Uint8Array(losp_placeholder._labelundo._rawDataZ[i]);
-}
+// // saves the current data so it can be restored if undo is called
+// function losp_updateundo (labelmap) {
+	// var x_width = labelmap._dimensions[0];
+	// var y_width = labelmap._dimensions[1];
+	// var z_width = labelmap._dimensions[2];
+// 	
+	// var tmp_arr = new Array(z_width);
+	// for(var d=0; d<z_width; d++) {
+		// tmp_arr[d] = new Array(y_width);
+		// for(var e=0; e<y_width; e++) {
+			// tmp_arr[d][e] = new Array(x_width);
+			// for(var f=0; f<x_width; f++) {
+				// tmp_arr[d][e][f] = labelmap._image[d][e][f];
+	// }}}
+	// losp_slices._labelundo._image = tmp_arr;
+	// losp_slices._labelundo._rawDataX = new Array();
+	// losp_slices._labelundo._rawDataY = new Array();
+	// losp_slices._labelundo._rawDataZ = new Array();
+	// var x_width = labelmap._dimensions[0];
+	// var y_width = labelmap._dimensions[1];
+	// var z_width = labelmap._dimensions[2];
+	// var i;
+	// for (i=0; i<x_width; i++)
+		// losp_slices._labelundo._rawDataX[i] = new Uint8Array(labelmap._slicesX._children[i]._texture._rawData);
+	// for (i=0; i<y_width; i++)
+		// losp_slices._labelundo._rawDataY[i] = new Uint8Array(labelmap._slicesY._children[i]._texture._rawData);
+	// for (i=0; i<z_width; i++)
+		// losp_slices._labelundo._rawDataZ[i] = new Uint8Array(labelmap._slicesZ._children[i]._texture._rawData);
+// }
+// 
+// //restores the undo data
+// function losp_performundo (labelmap) {
+	// var x_width = labelmap._dimensions[0];
+	// var y_width = labelmap._dimensions[1];
+	// var z_width = labelmap._dimensions[2];
+// 
+	// //fill placeholder with real data
+	// var losp_placeholder = new Losp_Slices();
+// 
+	// //making/copying a 3D JS array is a real pain in the butt
+	// losp_placeholder._labelundo._image = new Array(z_width);
+	// for(var d=0; d<z_width; d++) {
+		// losp_placeholder._labelundo._image[d] = new Array(y_width);
+		// for(var e=0; e<y_width; e++) {
+			// losp_placeholder._labelundo._image[d][e] = new Array(x_width);
+			// for(var f=0; f<x_width; f++) {
+				// losp_placeholder._labelundo._image[d][e][f] = labelmap._image[d][e][f];
+	// }}}
+// 	
+	// losp_placeholder._labelundo._rawDataX = new Array();
+	// losp_placeholder._labelundo._rawDataY = new Array();
+	// losp_placeholder._labelundo._rawDataZ = new Array();
+	// var i;
+	// for (i=0; i<x_width; i++)
+		// losp_placeholder._labelundo._rawDataX[i] = new Uint8Array(labelmap._slicesX._children[i]._texture._rawData);
+	// for (i=0; i<y_width; i++)
+		// losp_placeholder._labelundo._rawDataY[i] = new Uint8Array(labelmap._slicesY._children[i]._texture._rawData);
+	// for (i=0; i<z_width; i++)
+		// losp_placeholder._labelundo._rawDataZ[i] = new Uint8Array(labelmap._slicesZ._children[i]._texture._rawData);
+// 	
+	// //restore internal data to real
+	// var tmp_arr = new Array(z_width);
+	// for(var d=0; d<z_width; d++) {
+		// tmp_arr[d] = new Array(y_width);
+		// for(var e=0; e<y_width; e++) {
+			// tmp_arr[d][e] = new Array(x_width);
+			// for(var f=0; f<x_width; f++) {
+				// tmp_arr[d][e][f] = losp_slices._labelundo._image[d][e][f];
+	// }}}
+	// labelmap._image = tmp_arr;
+// 	
+	// var i;
+	// for (i=0; i<x_width; i++)
+		// labelmap._slicesX._children[i]._texture._rawData = new Uint8Array(losp_slices._labelundo._rawDataX[i]);
+	// for (i=0; i<y_width; i++)
+		// labelmap._slicesY._children[i]._texture._rawData = new Uint8Array(losp_slices._labelundo._rawDataY[i]);
+	// for (i=0; i<z_width; i++)
+		// labelmap._slicesZ._children[i]._texture._rawData = new Uint8Array(losp_slices._labelundo._rawDataZ[i]);
+// 	
+	// //fill internal with placeholder
+	// var tmp_arr2 = new Array(z_width);
+	// for(var d=0; d<z_width; d++) {
+		// tmp_arr2[d] = new Array(y_width);
+		// for(var e=0; e<y_width; e++) {
+			// tmp_arr2[d][e] = new Array(x_width);
+			// for(var f=0; f<x_width; f++) {
+				// tmp_arr2[d][e][f] = losp_placeholder._labelundo._image[d][e][f];
+	// }}}
+	// losp_slices._labelundo._image = tmp_arr2;
+// 	
+	// var i;
+	// for (i=0; i<x_width; i++)
+		// losp_slices._labelundo._rawDataX[i] = new Uint8Array(losp_placeholder._labelundo._rawDataX[i]);
+	// for (i=0; i<y_width; i++)
+		// losp_slices._labelundo._rawDataY[i] = new Uint8Array(losp_placeholder._labelundo._rawDataY[i]);
+	// for (i=0; i<z_width; i++)
+		// losp_slices._labelundo._rawDataZ[i] = new Uint8Array(losp_placeholder._labelundo._rawDataZ[i]);
+// }
 
 //change a 3D pixel to a new tissue of type 'id' in labelmap at (x, y, z)
 function losp_change_pixel(x, y, z, id, labelmap) {
@@ -786,7 +786,7 @@ function losp_change_pixel(x, y, z, id, labelmap) {
 		return -1; //error
 	}
 	
-	// TODO: Check if eraser option set
+	// Check if eraser option set
 	if (losp_slices._brush._eraser) {
 		id = 0; // Set color id to none
 	}
@@ -799,11 +799,12 @@ function losp_change_pixel(x, y, z, id, labelmap) {
 	var blue =  colors[3]*255.0;
 	var trans = colors[4]*255.0;
 	
-	if (!losp_slices._labelundo._inaction) {
-		losp_updateundo(labelmap);
-		losp_slices._labelundo._inaction = true;	
-	}
+	// if (!losp_slices._labelundo._inaction) {
+		// losp_slices._labelundo._inaction = true;	
+		// losp_updateundo(labelmap);
+	// }
 	
+	//window.console.log("XYZ: "+x+","+y+","+z+" changed to " + id);
 	//image: this 3D array is never used but i am going to update it anyway
 	if (labelmap!= null && labelmap._image!=null && labelmap._image.length > 0) {
 		volume.labelmap._image[z][y][x] = id;	
@@ -860,25 +861,31 @@ function losp_planerDot (x, y, z, view, radius, id, labelmap) {
 }
 
 //view is 'x', 'y', or 'z', up is true or false (up means view view+1)
-function losp_copy (up, view, labelmap) {
+// sliceNum 0 if next or prev
+function losp_copy (up, view, labelmap, sliceNum) {
 	//note: I have yet to copy the image3D array! worktobedone
-
-
 
 	//find dimensions						//same as  \/
 	var x_width = labelmap._dimensions[0]; //labelmap._children[0]._children.length;
 	var y_width = labelmap._dimensions[1]; //labelmap._children[1]._children.length;
 	var z_width = labelmap._dimensions[2]; //labelmap._children[2]._children.length;
 	
+	var newSlice = null;
+	
 	switch (view)
 	{
 	case 'x':
 		var currentSlice = losp_slices._Xslice._currentSlice;
-		var newSlice = (up) ? currentSlice+1 : currentSlice-1;
+		newSlice = (up) ? currentSlice+1 : currentSlice-1;
 		if ( newSlice<0 || newSlice>=x_width ) {
 			window.console.log("Error: Slice out of range");
 			return -1; //error
 		}
+		
+		if (sliceNum != 0) {
+			newSlice = sliceNum;
+		}
+		
 		//change X plane (easy)
 		labelmap._slicesX._children[newSlice]._texture._rawData = new Uint8Array(labelmap._slicesX._children[currentSlice]._texture._rawData);
 		
@@ -899,11 +906,16 @@ function losp_copy (up, view, labelmap) {
 		break;
 	case 'y':
 		var currentSlice = losp_slices._Yslice._currentSlice;
-		var newSlice = (up) ? currentSlice+1 : currentSlice-1;
+		newSlice = (up) ? currentSlice+1 : currentSlice-1;
 		if ( newSlice<0 || newSlice>=y_width ) {
 			window.console.log("Error: Slice out of range");
 			return -1; //error
 		}
+		
+		if (sliceNum != 0) {
+			newSlice = sliceNum;
+		}
+		
 		//change Y plane (easy)
 		labelmap._slicesY._children[newSlice]._texture._rawData = new Uint8Array(labelmap._slicesY._children[currentSlice]._texture._rawData);
 		
@@ -924,11 +936,16 @@ function losp_copy (up, view, labelmap) {
 		break;
 	case 'z':
 		var currentSlice = losp_slices._Zslice._currentSlice;
-		var newSlice = (up) ? currentSlice+1 : currentSlice-1;
+		newSlice = (up) ? currentSlice+1 : currentSlice-1;
 		if ( newSlice<0 || newSlice>=z_width ) {
 			window.console.log("Error: Slice out of range");
 			return -1; //error
 		}
+		
+		if (sliceNum != 0) {
+			newSlice = sliceNum;
+		}
+		
 		//change Z plane (easy)
 		labelmap._slicesZ._children[newSlice]._texture._rawData = new Uint8Array(labelmap._slicesZ._children[currentSlice]._texture._rawData);
 		
@@ -949,7 +966,10 @@ function losp_copy (up, view, labelmap) {
 		break;
 	default:
 		window.console.log('Error: invalid view.');
+		break;
 	}
+	
+	return newSlice;
 }
 
 //check if 4 ints are equal
@@ -1102,11 +1122,108 @@ function losp_checkimage (labelmap, percent) {
 	window.console.log("check complete: data consistent");
 }
 
+//the main function call, gets called in onMouseMovementInside(drag=true) AND onMouseUp(drag=false)
+function losp_MouseMove(id, drag) {
 
+		var slicedata = null;
+		var view = null;
+		switch (id)
+		{
+		case 10:
+			slicedata = losp_slices._Xslice;
+			view = 'x';
+		  break;
+		case 17:
+			slicedata = losp_slices._Yslice;
+			view = 'y';
+		  break;
+		case 24:
+			slicedata = losp_slices._Zslice;
+			view = 'z';
+		  break;
+		default:
+		  window.console.log('Error: bad _camera._id');
+		}
+
+		var _paintX = event.offsetX;
+		var _paintY = event.offsetY;
+
+
+	  var _paintSliceX = 0;
+	  var _paintSliceY = 0;
+
+	  if (_paintX * _paintY > 0) {
+
+		var _sliceRatio = slicedata._sliceWidth/slicedata._sliceHeight;
+		var _viewRatio = slicedata._width/slicedata._height;
+
+		if (_viewRatio < _sliceRatio) {
+			// letter boxed with black regions on top and bottom
+			var _zoomRatio = slicedata._sliceWidth / slicedata._width;
+			var _zoomedSliceHeight = slicedata._sliceHeight / _zoomRatio;
+			var _margin = (slicedata._height - _zoomedSliceHeight)/2;
+			_paintSliceY = _paintY - _margin;
+			_paintSliceY = _paintSliceY * _zoomRatio;
+			_paintSliceX = _paintX * _zoomRatio;
+		} else {
+			// letter boxed with black regions on sides
+			var _zoomRatio = slicedata._sliceHeight / slicedata._height;
+			var _zoomedSliceWidth = slicedata._sliceWidth / _zoomRatio;
+			var _margin = (slicedata._width - _zoomedSliceWidth)/2;
+			_paintSliceX = _paintX - _margin;
+			_paintSliceX = _paintSliceX * _zoomRatio;
+			_paintSliceY = _paintY * _zoomRatio;
+		}
+
+		if (_paintSliceX * _paintSliceY > 0) {
+			_paintSliceX = Math.floor(_paintSliceX+0.5);
+			_paintSliceY = Math.floor(_paintSliceY+0.5);
+			_paintSliceZ = Math.floor(slicedata._currentSlice+0.49);
+
+			//losp
+			//find dimensions						//same as  \/
+			var x_width = volume._labelmap._dimensions[0]; //labelmap._children[0]._children.length;
+			var y_width = volume._labelmap._dimensions[1]; //labelmap._children[1]._children.length;
+			var z_width = volume._labelmap._dimensions[2]; //labelmap._children[2]._children.length;
+			//*
+
+			var xx, yy, zz, plane;
+			
+			switch (view) {
+				case 'x':
+					x = _paintSliceZ
+					y = y_width - _paintSliceX;
+					z = z_width - _paintSliceY;
+					break;
+				case 'y':
+					x = x_width - _paintSliceX;
+					y = _paintSliceZ;
+					z = z_width - _paintSliceY;
+					break;
+				case 'z':
+					x = x_width - _paintSliceX;
+					y = y_width - _paintSliceY;
+					z = _paintSliceZ;
+					break;
+				default:
+					window.console.log('Error: bad _camera._id');
+					break;
+			}
+			
+			if (losp_slices._brush._mode == 1) //paint
+				losp_planerDot(x, y, z, view, losp_slices._brush._size, losp_slices._brush._colorid, volume._labelmap);
+			else if (losp_slices._brush._mode==2 && !drag)//2D fill
+				losp_2D_fill(x, y, z, view, losp_slices._brush._colorid, volume._labelmap);
+		}
+	}										
 
 X.interactor.prototype.onMouseMovementInside_ = function(event) {
 	
-
+	if (this instanceof X.interactor2D && this._leftButtonDown) {
+		losp_MouseMove(this._id, true);
+	}
+	
+/*
 if (this instanceof X.interactor2D && this._leftButtonDown) {
 	
 	var slicedata = null;
@@ -1199,6 +1316,7 @@ if (this instanceof X.interactor2D && this._leftButtonDown) {
   	}
   }										
 }
+*/
 //////////////////////////////////////////end add
 	
   this['mousemoveEvent'] = event; // we need to buffer the event to run eval in

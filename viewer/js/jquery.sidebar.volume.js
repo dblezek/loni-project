@@ -153,5 +153,9 @@ jQuery(function() {
   jQuery('#copyPrev').click(function() {
   	copyPrevOption();
   });
+  
+  jQuery('#sliceNum').bind('keypress', function(e) {
+  	sliceNumOption(e);
+  });
 	
 });

@@ -207,7 +207,7 @@
 							
 							<br/><br/><br/><br/>
 							<div class="colorBox">
-								<b>Color Id:</b> (Up to 3 digits)</div><input type="text" id="colorId" maxlength="3" size="1" value="0"> <i id="labelName"></i>
+								<b>Color Id:</b> (0 - 255)</div><input type="text" id="colorId" maxlength="3" size="1" value="0"> <i id="labelName"></i>
 							<br/>
 							
 							<b>Paint Brush Size: </b>
@@ -225,24 +225,19 @@
 						<div id='optionTab' class='tabContent' style='display: none'>
 							
 							<button type="button" id="undoOption">Undo</button> <button type="button" id="redoOption">Redo</button>
+							
 <!-- 							<input id='colorOption' type='hidden'
 									class='color-picker black' size='6' value='#ffffff'/>
 							<br/> -->
 							
-<!-- 							<b>Paint Brush Size: </b><br/>
-							<input type="radio" name="group1" value="small" id="brushSmallOption" checked> Small
-							<input type="radio" name="group1" value="medium"id="brushMediumOption"> Medium
-							<input type="radio" name="group1" value="large" id="brushLargeOption"> Large
-							<br/><br/> -->
-							
-							<br/><br/>
+							<br/><i id='functionMessage' style='color: #FF0000'></i><br/>
 							<b>Clobber</b> <input id="clobberOption" type="checkbox" name="clobber" checked="checked"/>
 							<br/>
 							
 							<b>2D Fill</b> <input id="2dBucketOption" type="checkbox" name="2dBucket"/>
 							
 							<b>	3D Fill</b> <input id="3dBucketOption" type="checkbox" name="3dBucket"/>
-							<br/><br/>
+							<br/>
 							
 							<button type="button" id="copyNext">Copy to Next</button>	
 							<select id="copyPasteOption">
@@ -252,6 +247,9 @@
 							</select>
 							<br/>
 							<button type="button" id="copyPrev">Copy to Previous</button>
+							
+							<br/>
+							Copy to slice #: <input type="text" id="sliceNum" maxlength="3" size="1" style="height: 12px"> (Enter)
 							
 						</div>
 					</div>
