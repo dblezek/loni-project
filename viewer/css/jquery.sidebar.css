@@ -46,6 +46,14 @@
   -khtml-border-top-right-radius: 2px;	
 }
 
+#volumeTab {
+	height: 150px;
+}
+
+#labelmapTab {
+	height: 400px;
+}
+
 .navigation {
 	position: fixed;
 	margin: 0px;

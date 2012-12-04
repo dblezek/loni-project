@@ -242,8 +242,6 @@ X.volume = function(volume) {
 // inherit from X.object
 goog.inherits(X.volume, X.object);
 
-
-
 /**
  * Copies the properties from a given volume to this volume.
  * 

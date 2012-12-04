@@ -671,6 +671,36 @@ function losp_performUndoRedo(type, labelmap) {
 
 }
 
+/*
+ * Initialize the color map to 0
+ */
+function initializeLabelBlank() {
+	
+ 	var dataX = volume._labelmap._slicesX._children;
+ 	var dataY = volume._labelmap._slicesY._children;
+ 	var dataZ = volume._labelmap._slicesZ._children;
+ 	for (var i = 0; i < dataX.length; i++) {
+ 		for (var j = 0; j < dataX[i]._texture._rawData.length; j++) {
+ 			dataX[i]._texture._rawData[j] = 0;
+ 		}
+ 	}
+ 	for (var i = 0; i < dataY.length; i++) {
+ 		for (var j = 0; j < dataY[i]._texture._rawData.length; j++) {
+ 			dataY[i]._texture._rawData[j] = 0;
+ 		}
+ 	}
+ 	for (var i = 0; i < dataZ.length; i++) {
+ 		for (var j = 0; j < dataZ[i]._texture._rawData.length; j++) {
+ 			dataZ[i]._texture._rawData[j] = 0;
+ 		}
+ 	}
+ 	
+ 	volume.labelmap.modified();
+ 	
+ 	while (losp_slices._undoRedo._undo.pop() != null);
+ 	losp_addUndoRedo('U', volume._labelmap);
+}
+
 // // saves the current data so it can be restored if undo is called
 // function losp_updateundo (labelmap) {
 	// var x_width = labelmap._dimensions[0];
@@ -887,11 +917,15 @@ function losp_copy (up, view, labelmap, sliceNum) {
 		newSlice = (up) ? currentSlice+1 : currentSlice-1;
 		if ( newSlice<0 || newSlice>=x_width ) {
 			window.console.log("Error: Slice out of range");
-			return -1; //error
+			return null; //error
 		}
 		
 		if (sliceNum != 0) {
 			newSlice = sliceNum;
+		}
+		
+		if (newSlice > labelmap._slicesX._children.length - 1) {
+			return null;
 		}
 		
 		//change X plane (easy)
@@ -917,11 +951,15 @@ function losp_copy (up, view, labelmap, sliceNum) {
 		newSlice = (up) ? currentSlice+1 : currentSlice-1;
 		if ( newSlice<0 || newSlice>=y_width ) {
 			window.console.log("Error: Slice out of range");
-			return -1; //error
+			return null; //error
 		}
 		
 		if (sliceNum != 0) {
 			newSlice = sliceNum;
+		}
+		
+		if (newSlice > labelmap._slicesX._children.length - 1) {
+			return null;
 		}
 		
 		//change Y plane (easy)
@@ -947,11 +985,15 @@ function losp_copy (up, view, labelmap, sliceNum) {
 		newSlice = (up) ? currentSlice+1 : currentSlice-1;
 		if ( newSlice<0 || newSlice>=z_width ) {
 			window.console.log("Error: Slice out of range");
-			return -1; //error
+			return null; //error
 		}
 		
 		if (sliceNum != 0) {
 			newSlice = sliceNum;
+		}
+		
+		if (newSlice > labelmap._slicesX._children.length - 1) {
+			return null;
 		}
 		
 		//change Z plane (easy)

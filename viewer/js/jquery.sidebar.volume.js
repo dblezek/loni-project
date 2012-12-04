@@ -157,5 +157,29 @@ jQuery(function() {
   jQuery('#sliceNum').bind('keypress', function(e) {
   	sliceNumOption(e);
   });
+  
+  jQuery('#sliceXPrev').click(function() {
+  	changeSliceOption('X', true);
+  });
+  
+  jQuery('#sliceXNext').click(function() {
+  	changeSliceOption('X', false);
+  });
+  
+  jQuery('#sliceYPrev').click(function() {
+  	changeSliceOption('Y', true);
+  });
+  
+  jQuery('#sliceYNext').click(function() {
+  	changeSliceOption('Y', false);
+  });
+  
+  jQuery('#sliceZPrev').click(function() {
+  	changeSliceOption('Z', true);
+  });
+  
+  jQuery('#sliceZNext').click(function() {
+  	changeSliceOption('Z', false);
+  });
 	
 });
