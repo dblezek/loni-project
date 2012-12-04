@@ -439,9 +439,137 @@ ren3d.camera.view = new X.matrix(
 };
 
 
-function closeDialog() {
-	$("#dialog-modal").dialog('close');
+
+function updateMeshMatrix() {
+   
+   var matrix11 = parseFloat(jQuery('#matrix11').val());
+   var matrix12 = parseFloat(jQuery('#matrix12').val());
+   var matrix13 = parseFloat(jQuery('#matrix13').val());
+   var matrix14 = parseFloat(jQuery('#matrix14').val());
+   var matrix21 = parseFloat(jQuery('#matrix21').val());
+   var matrix22 = parseFloat(jQuery('#matrix22').val());
+   var matrix23 = parseFloat(jQuery('#matrix23').val());
+   var matrix24 = parseFloat(jQuery('#matrix24').val());
+   var matrix31 = parseFloat(jQuery('#matrix31').val());
+   var matrix32 = parseFloat(jQuery('#matrix32').val());
+   var matrix33 = parseFloat(jQuery('#matrix33').val());
+   var matrix34 = parseFloat(jQuery('#matrix34').val());
+   var matrix41 = parseFloat(jQuery('#matrix41').val());
+   var matrix42 = parseFloat(jQuery('#matrix42').val());
+   var matrix43 = parseFloat(jQuery('#matrix43').val());
+   var matrix44 = parseFloat(jQuery('#matrix44').val());
+   
+   mesh.transform.matrix = new X.matrix(
+	  [[matrix11, matrix12, matrix13, matrix14], [matrix21, matrix22, matrix23, matrix24],
+	  [matrix31, matrix32, matrix33, matrix34], [matrix41, matrix42, matrix43, matrix44]]);
+   mesh.modified();
+   
 }
+
+
+function updateMeshMatrixDialog() {
+
+   var matrix = jQuery('#matrix-content').val().split(/[\n]+/);
+   var m1 = matrix[0].split(/[\s]+/);
+   var matrix11 = parseFloat(m1[0]); jQuery('#matrix11').val(matrix11);
+   var matrix12 = parseFloat(m1[1]); jQuery('#matrix12').val(matrix12);
+   var matrix13 = parseFloat(m1[2]); jQuery('#matrix13').val(matrix13);
+   var matrix14 = parseFloat(m1[3]); jQuery('#matrix14').val(matrix14);
+   var m2 = matrix[1].split(/[\s]+/);
+   var matrix21 = parseFloat(m2[0]); jQuery('#matrix21').val(matrix21);
+   var matrix22 = parseFloat(m2[1]); jQuery('#matrix22').val(matrix22);
+   var matrix23 = parseFloat(m2[2]); jQuery('#matrix23').val(matrix23);
+   var matrix24 = parseFloat(m2[3]); jQuery('#matrix24').val(matrix24);
+   var m3 = matrix[2].split(/[\s]+/);
+   var matrix31 = parseFloat(m3[0]); jQuery('#matrix31').val(matrix31);
+   var matrix32 = parseFloat(m3[1]); jQuery('#matrix32').val(matrix32);
+   var matrix33 = parseFloat(m3[2]); jQuery('#matrix33').val(matrix33);
+   var matrix34 = parseFloat(m3[3]); jQuery('#matrix34').val(matrix34);
+   var m4 = matrix[3].split(/[\s]+/);
+   var matrix41 = parseFloat(m4[0]); jQuery('#matrix41').val(matrix41);
+   var matrix42 = parseFloat(m4[1]); jQuery('#matrix42').val(matrix42);
+   var matrix43 = parseFloat(m4[2]); jQuery('#matrix43').val(matrix43);
+   var matrix44 = parseFloat(m4[3]); jQuery('#matrix44').val(matrix44);
+   
+   mesh.transform.matrix = new X.matrix(
+	  [[matrix11, matrix12, matrix13, matrix14], [matrix21, matrix22, matrix23, matrix24],
+	  [matrix31, matrix32, matrix33, matrix34], [matrix41, matrix42, matrix43, matrix44]]);
+   mesh.modified();
+   
+   jQuery("#dialog-modal").dialog('close');
+}
+
+
+
+
+function exportMeshMatrix() {
+
+   var matrix11 = parseFloat(jQuery('#matrix11').val());
+   var matrix12 = parseFloat(jQuery('#matrix12').val());
+   var matrix13 = parseFloat(jQuery('#matrix13').val());
+   var matrix14 = parseFloat(jQuery('#matrix14').val());
+   var matrix21 = parseFloat(jQuery('#matrix21').val());
+   var matrix22 = parseFloat(jQuery('#matrix22').val());
+   var matrix23 = parseFloat(jQuery('#matrix23').val());
+   var matrix24 = parseFloat(jQuery('#matrix24').val());
+   var matrix31 = parseFloat(jQuery('#matrix31').val());
+   var matrix32 = parseFloat(jQuery('#matrix32').val());
+   var matrix33 = parseFloat(jQuery('#matrix33').val());
+   var matrix34 = parseFloat(jQuery('#matrix34').val());
+   var matrix41 = parseFloat(jQuery('#matrix41').val());
+   var matrix42 = parseFloat(jQuery('#matrix42').val());
+   var matrix43 = parseFloat(jQuery('#matrix43').val());
+   var matrix44 = parseFloat(jQuery('#matrix44').val());
+   
+   var output = matrix11 + " " + matrix12 + " " + matrix13 + " " + matrix14 + "\n";
+   output += matrix21 + " " + matrix22 + " " + matrix23 + " " + matrix24 + "\n";
+   output += matrix31 + " " + matrix32 + " " + matrix33 + " " + matrix34 + "\n";
+   output += matrix41 + " " + matrix42 + " " + matrix43 + " " + matrix44;
+   
+   jQuery("#matrix-content").val(output);
+   
+   jQuery("#dialog-modal" ).dialog({
+		height: 220,
+		modal: true
+   });
+      
+}
+
+var isAnimate = false;
+
+function rotateAnimateStart() {
+	var rotate_direction = parseInt(jQuery('#rotate-direction').val());
+	var rotate_rate = jQuery('#rotate-rate').slider("value");
+	ren3d.animateRotateDirection = rotate_direction;
+	ren3d.animateRotateRate = rotate_rate;
+	isAnimate = true;
+	jQuery('#animateStartButton').hide();
+	jQuery('#animateStopButton').show();
+}
+
+function rotateAnimateRate(event, ui) {
+	if (!isAnimate) {
+		return;
+	}
+	var rotate_rate = ui.value;
+	ren3d.animateRotateRate = rotate_rate;
+}
+
+function rotateAnimateDirection() {
+	if (!isAnimate) {
+		return;
+	}
+	var rotate_direction = parseInt(jQuery('#rotate-direction').val());
+	ren3d.animateRotateDirection = rotate_direction;
+}
+
+function rotateAnimateStop() {
+	ren3d.animateRotateRate = 0;
+	isAnimate = false;
+	jQuery('#animateStartButton').show();
+	jQuery('#animateStopButton').hide();
+}
+
 
 function saveFile() {
 	if (volume.file == null) {
@@ -451,58 +579,136 @@ function saveFile() {
 	jQuery("#saveFileButton").attr("disabled", "disabled");
 	jQuery("#saveFileInfo").html("Preparing file...<img src=\"gfx/ajax-loader.gif\">");
 	
-	// get volume info
-	var z = volume.image.length;
-	var y = volume.image[0].length;
-	var x = volume.image[0][0].length;
-	var pixx = volume.spacing[0];
-	var pixy = volume.spacing[1];
-	var pixz = volume.spacing[2];
+	var fileinfo = getFileInfo();
 	
-	// get image volume data in an array,
-	// each slice is stored as string, as an element of the array,
-	// each point has an integer value to represent intensity,
-	// on each slice, points ordered from the left upper corner
-	// to the right lower corner, and separated by lines.
-	// Points are separated by comma ","
-	// lines are separated by semicolon ";"
-	// if all the points in an entire line are all 0, 
-	// you can optionally use a single 0 to save space. 
-	var myarr = new Array();
-	for (var i = 0; i < z; i++) {
-		var image2 = volume.image[i];
-		var slice = "";
-		for (var j = 0; j < y; j++) {
-			var image3 = image2[j];
-			var line = "";
-			var all_zero = true;
-			for (var k = 0; k < x; k++) {
-				line += image3[k] + ",";
-				if (all_zero && image3[k] != 0) {
-					all_zero = false;
-				}
-			}
-			if (all_zero) {
-				slice += "0;";
-			} else {
-				slice += line+";";
-			}
-		}
-		myarr.push(slice);
-	}
+	window.console.log(fileinfo);
 	
-	// debugging info
-	window.console.log("x=" + x + ", y=" + y + ", z=" + z);
-	window.console.log("pixx=" + pixx + ", pixy=" + pixy + ", pixz=" + pixz);
-	window.console.log(myarr);
-	
-	// send request to generate file
-	jQuery.post("http://ec2-184-73-98-217.compute-1.amazonaws.com/download.php", { 'x': x, 'y': y, 'z':z, 'pixx': pixx, 'pixy': pixy, 'pixz':pixz, 'data': myarr  } , function(data) {
-  		jQuery("#saveFileButton").removeAttr("disabled");
+	jQuery.post("http://ec2-184-73-98-217.compute-1.amazonaws.com/viewer/download.php",  fileinfo, function(data) {
+  		window.console.log(data);
+  		
+		jQuery("#saveFileButton").removeAttr("disabled");
 		jQuery("#saveFileInfo").html(data);
 	}).error(function() { 
 		jQuery("#saveFileButton").removeAttr("disabled");
 		jQuery("#saveFileInfo").html("Error");
 	});
 	
+}
+
+function saveFileNode() {
+	if (volume.file == null) {
+		return;
+	}
+	
+	jQuery("#saveFileNodeButton").attr("disabled", "disabled");
+	jQuery("#saveFileInfo").html("Preparing file...<img src=\"gfx/ajax-loader.gif\">");
+	
+	var fileinfo = getFileInfo();
+	
+	jQuery.post("http://ec2-184-73-98-217.compute-1.amazonaws.com:8001/downloadNII", fileinfo, function(data) {
+  		window.console.log(data);
+  		
+		jQuery("#saveFileNodeButton").removeAttr("disabled");
+		jQuery("#saveFileInfo").html(data);
+	}).error(function() { 
+		jQuery("#saveFileNodeButton").removeAttr("disabled");
+		jQuery("#saveFileInfo").html("Error");
+	});
+	
+}
+
+function getFileInfo() {
+	// image file info
+	var z = volume.image.length;
+	var y = volume.image[0].length;
+	var x = volume.image[0][0].length;
+	var pixx = volume.spacing[0];
+	var pixy = volume.spacing[1];
+	var pixz = volume.spacing[2];
+	// color map info
+	var colormap_key = volume._labelmap._colortable._map.keys_;
+	var colormap_name = [];
+	var colormap_r = [];
+	var colormap_g = [];
+	var colormap_b = [];
+	var colormap_a = [];
+	
+	for (var i=0; i < colormap_key.length; ++i) {
+		if (!volume._labelmap._colortable._map.containsKey(i)) {
+			window.console.log('Error, non valid color id');
+			return -1; //error
+		}
+		//look up red, blue, green from colormapping
+		var colors = volume._labelmap._colortable._map.get(i);
+		colormap_name.push(colors[0]);
+		colormap_r.push(colors[1]*255.0);
+		colormap_g.push(colors[2]*255.0);
+		colormap_b.push(colors[3]*255.0);
+		colormap_a.push(colors[4]*255.0);		
+	}
+	
+	// file data in 1D array
+	// each element is a slice
+    // each string between semicolon is a row
+    // each number between comma is a dot/intensity
+    // if everyone in a row has value 0, it can be represented as a single 0 
+	var myarr = new Array();
+	for (var i = 0; i < z; i++) {
+		var image2 = volume._labelmap.image[i];
+		var myarr2 = "";
+		for (var j = 0; j < y; j++) {
+			var image3 = image2[j];
+			var mystr = "";
+			var all_zero = true;
+			for (var k = 0; k < x; k++) {
+				mystr += image3[k] + ",";
+				if (all_zero && image3[k] != 0) {
+					all_zero = false;
+				}
+			}
+			if (all_zero) {
+				myarr2 += "0;";
+			} else {
+				myarr2 += mystr+";";
+			}
+		}
+		myarr.push(myarr2);
+	}
+	
+	return { 'x': x, 'y': y, 'z':z, 'pixx': pixx, 'pixy': pixy, 'pixz':pixz, 'data': myarr, 
+		'colormap_key': colormap_key, 'colormap_name': colormap_name, 'colormap_r': colormap_r, 
+		'colormap_g': colormap_g, 'colormap_b': colormap_b, 'colormap_a': colormap_a};
+}
+
+
+
+// LZW-compress a string
+function lzw_encode(s) {
+    var dict = {};
+    var data = (s + "").split("");
+    var out = [];
+    var currChar;
+    var phrase = data[0];
+    var code = 256;
+    for (var i=1; i<data.length; i++) {
+        currChar=data[i];
+        if (dict[phrase + currChar] != null) {
+            phrase += currChar;
+        }
+        else {
+            out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
+            dict[phrase + currChar] = code;
+            code++;
+            phrase=currChar;
+        }
+    }
+    out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
+    for (var i=0; i<out.length; i++) {
+        out[i] = String.fromCharCode(out[i]);
+    }
+    return out.join("");
+}
+
+function closeDialog() {
+	jQuery("#dialog-modal").dialog('close');
 }

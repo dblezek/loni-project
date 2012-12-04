@@ -413,12 +413,7 @@ X.interactor.prototype.onMouseDown = function(left, middle, right) {
  */
 X.interactor.prototype.onMouseUp_ = function(event) {
 	
-	// if (!losp_slices._labelundo._inaction) {//has NOT been drawing, just a click
-		// debugger;
-		// losp_MouseMove(this._id, false); //false means not a drag, just a click
-	// }
-	// //all actions are complete
-	// losp_slices._labelundo._inaction = false;
+	 
 
   if (event.button == goog.events.BrowserEvent.MouseButton.LEFT) {
     
@@ -434,10 +429,15 @@ X.interactor.prototype.onMouseUp_ = function(event) {
   } else if (event.button == goog.events.BrowserEvent.MouseButton.RIGHT) {
     
     // right button click
-    this._rightButtonDown = false;
-    
+    this._rightButtonDown = false; 
   }
   
+  if (this instanceof X.interactor2D && !losp_slices._labelundo._inaction) {//has NOT been drawing, just a click
+	losp_MouseMove(this._id, false); //false means not a drag, just a click
+  }
+  //all actions are complete
+  losp_slices._labelundo._inaction = false;
+   
   if (this instanceof X.interactor2D) {
   	// create a new paint event
   	var e = new X.event.PaintEvent();
@@ -458,6 +458,7 @@ X.interactor.prototype.onMouseUp_ = function(event) {
   // prevent further handling by the browser
   event.preventDefault();
   
+
 };
 
 
@@ -1107,7 +1108,6 @@ function losp_2D_fill(x, y, z, view, id, labelmap) {
 		//if (! (losp_checkequal(Ired, Xred, Yred, Zred) && losp_checkequal(Igreen, Xgreen, Ygreen, Zgreen) && losp_checkequal(Iblue, 				Xblue, Yblue, Zblue) && losp_checkequal(Itrans, Xtrans, Ytrans, Ztrans) ) ) {
 		if (! (losp_checkequal(Xred, Xred, Yred, Zred) && losp_checkequal(Xgreen, Xgreen, Ygreen, Zgreen) && losp_checkequal(Xblue, Xblue, Yblue, Zblue) && losp_checkequal(Xtrans, Xtrans, Ytrans, Ztrans) ) ) {
 			window.console.log("Error: color inconsitency");
-			debugger;
 			return -1; //error
 		}
 	
@@ -1314,13 +1314,6 @@ function losp_3D_fill(x, y, z, view, id, labelmap) {
 		var Iblue =  imagecolors[3]*255.0;
 		var Itrans = imagecolors[4]*255.0;
 	
-		//if (! (losp_checkequal(Ired, Xred, Yred, Zred) && losp_checkequal(Igreen, Xgreen, Ygreen, Zgreen) && losp_checkequal(Iblue, 				Xblue, Yblue, Zblue) && losp_checkequal(Itrans, Xtrans, Ytrans, Ztrans) ) ) {
-		/*if (! (losp_checkequal(Xred, Xred, Yred, Zred) && losp_checkequal(Xgreen, Xgreen, Ygreen, Zgreen) && losp_checkequal(Xblue, Xblue, Yblue, Zblue) && losp_checkequal(Xtrans, Xtrans, Ytrans, Ztrans) ) ) {
-			window.console.log("Error: color inconsitency");
-			debugger;
-			return -1; //error
-		}*/
-	
 		//if pixel is already colored, end of line
 		if ((volume._image[z][y][x]<volume.lowerThreshold) || (volume._image[z][y][x]>volume.upperThreshold))
 			continue; //dead end
@@ -1330,7 +1323,6 @@ function losp_3D_fill(x, y, z, view, id, labelmap) {
 		switch (view)
 		{
 		case 'x':
-			debugger;
 			pos=[x+1,y,z];
 			queue.enqueue(pos);
 			pos=[x-1,y,z];
@@ -1536,7 +1528,7 @@ function losp_MouseMove(id, drag) {
 			
 			if (losp_slices._brush._mode == 1) //paint
 				losp_planerDot(x, y, z, view, losp_slices._brush._size, losp_slices._brush._colorid, volume._labelmap);
-			else if (losp_slices._brush._mode==2) // TODO: for now // && !drag) 
+			else if (losp_slices._brush._mode==2 && !drag) 
 				losp_2D_fill(x, y, z, view, losp_slices._brush._colorid, volume._labelmap);
 				
 		}
