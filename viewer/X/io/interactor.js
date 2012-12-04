@@ -596,13 +596,10 @@ function Losp_UndoRedo() {
  
  //changes the given pixel in the 1D "_rawData" arrays
  function losp_2Dpixfill (rawData, index, red, green, blue, trans) {
-	//window.console.log('Previous pixel color: r' + rawData[index] + ', g' + rawData[index+1] + ', b' + rawData[index+2] + ', index: ' + index);
-	if (losp_slices._brush._clobber || (rawData[index]==0 && rawData[index+1]==0 && rawData[index+2]==0)) {
-		rawData[index] = red;
-		rawData[index+1] = green;
-		rawData[index+2] = blue;
-		rawData[index+3] = trans;
-	}
+	rawData[index] = red;
+	rawData[index+1] = green;
+	rawData[index+2] = blue;
+	rawData[index+3] = trans;
 }
 
 // type = R for redo or U for undo
@@ -676,23 +673,51 @@ function losp_performUndoRedo(type, labelmap) {
  * Initialize the color map to 0
  */
 function initializeLabelBlank() {
+	var background_id = 0;
 	
  	var dataX = volume._labelmap._slicesX._children;
  	var dataY = volume._labelmap._slicesY._children;
  	var dataZ = volume._labelmap._slicesZ._children;
+	
+	var tmp_arr = new Array(dataZ.length);
+	for(var d=0; d<dataZ.length; d++) {
+		tmp_arr[d] = new Array(dataY.length);
+		for(var e=0; e<dataY.length; e++) {
+			tmp_arr[d][e] = new Array(dataX.length);
+			for(var f=0; f<dataX.length; f++) {
+				tmp_arr[d][e][f] = background_id;
+	}}}
+	volume._labelmap._image = tmp_arr;
+	
+	var colors = volume._labelmap._colortable._map.get(background_id);
+	var name =  colors[0];
+	var red =   colors[1]*255.0;
+	var green = colors[2]*255.0;
+	var blue =  colors[3]*255.0;
+	var trans = colors[4]*255.0;
+	
  	for (var i = 0; i < dataX.length; i++) {
- 		for (var j = 0; j < dataX[i]._texture._rawData.length; j++) {
- 			dataX[i]._texture._rawData[j] = 0;
+ 		for (var j = 0; j < dataX[i]._texture._rawData.length; j+=4) {
+ 			dataX[i]._texture._rawData[j] = red;
+ 			dataX[i]._texture._rawData[j+1] = green;
+ 			dataX[i]._texture._rawData[j+2] = blue;
+ 			dataX[i]._texture._rawData[j+3] = trans;
  		}
  	}
  	for (var i = 0; i < dataY.length; i++) {
- 		for (var j = 0; j < dataY[i]._texture._rawData.length; j++) {
- 			dataY[i]._texture._rawData[j] = 0;
+ 		for (var j = 0; j < dataY[i]._texture._rawData.length; j+=4) {
+ 			dataY[i]._texture._rawData[j] = red;
+ 			dataY[i]._texture._rawData[j+1] = green;
+ 			dataY[i]._texture._rawData[j+2] = blue;
+ 			dataY[i]._texture._rawData[j+3] = trans;
  		}
  	}
  	for (var i = 0; i < dataZ.length; i++) {
- 		for (var j = 0; j < dataZ[i]._texture._rawData.length; j++) {
- 			dataZ[i]._texture._rawData[j] = 0;
+ 		for (var j = 0; j < dataZ[i]._texture._rawData.length; j+=4) {
+ 			dataZ[i]._texture._rawData[j] = red;
+ 			dataZ[i]._texture._rawData[j+1] = green;
+ 			dataZ[i]._texture._rawData[j+2] = blue;
+ 			dataZ[i]._texture._rawData[j+3] = trans;
  		}
  	}
  	
@@ -842,28 +867,23 @@ function losp_change_pixel(x, y, z, id, labelmap) {
 		// losp_updateundo(labelmap);
 	// }
 	
+	//check labelmap to exsist
+	if (labelmap== null || labelmap._image==null || labelmap._image.length < 1) {
+		window.console.log('Error: _image not defined');
+		return;
+	}		
+	
+	//check for clobber
+	if (!losp_slices._brush._clobber && volume.labelmap._image[z][y][x]!=0)
+		return; //pixel not to be changed due to clobber
+	
 	//window.console.log("XYZ: "+x+","+y+","+z+" changed to " + id);
 	//image: this 3D array is never used but i am going to update it anyway
-	if (labelmap!= null && labelmap._image!=null && labelmap._image.length > 0) {
-		volume.labelmap._image[z][y][x] = id;	
-	}
-	
-	//2D:
+	volume.labelmap._image[z][y][x] = id;	
+		
 	losp_2Dpixfill(labelmap._slicesX._children[x]._texture._rawData, (z*y_width+y)*4, red, green, blue, trans); //set pixel in X plane
 	losp_2Dpixfill(labelmap._slicesY._children[y]._texture._rawData, (z*x_width+x)*4, red, green, blue, trans); //Y plane
 	losp_2Dpixfill(labelmap._slicesZ._children[z]._texture._rawData, (y*x_width+x)*4, red, green, blue, trans); //Z Plane
-			//2D; this code has the identical effect:
-			//losp_2Dpixfill(labelmap._children[0]._children[x]._texture._rawData, (z*y_width+y)*4, red, green, blue, trans); //set pixel in X plane
-			//losp_2Dpixfill(labelmap._children[1]._children[y]._texture._rawData, (z*x_width+x)*4, red, green, blue, trans); //Y plane
-			//losp_2Dpixfill(labelmap._children[2]._children[z]._texture._rawData, (y*x_width+x)*4, red, green, blue, trans); //Z Plane
-	
-	
-	//3D:
-	//set pixel in X plane
-	//Y plane
-	//Z Plane
-
-
 } 
 
 //radius of 1 is single pixel, view is 'x', 'y', or 'z'
