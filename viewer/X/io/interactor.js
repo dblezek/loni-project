@@ -922,31 +922,41 @@ function losp_planerDot (x, y, z, view, radius, id, labelmap) {
 //view is 'x', 'y', or 'z', up is true or false (up means view view+1)
 // sliceNum 0 if next or prev
 function losp_copy (up, view, labelmap, sliceNum) {
-	//note: I have yet to copy the image3D array! worktobedone
-
 	//find dimensions						//same as  \/
 	var x_width = labelmap._dimensions[0]; //labelmap._children[0]._children.length;
 	var y_width = labelmap._dimensions[1]; //labelmap._children[1]._children.length;
 	var z_width = labelmap._dimensions[2]; //labelmap._children[2]._children.length;
 	
+	var currentSlice = 0;
+	switch (view)
+	{
+	case 'x':
+		currentSlice = losp_slices._Xslice._currentSlice;
+		break;
+	case 'y':
+		currentSlice = losp_slices._Yslice._currentSlice;
+		break;
+	case 'z':
+		currentSlice = losp_slices._Zslice._currentSlice;
+		break;
+	default:
+		window.console.log('Error: invalid view.');
+		return;
+		break;
+	}
+	
 	var newSlice = null;
+	if (sliceNum != 0)
+		newSlice = sliceNum;
+	else
+		newSlice = (up) ? currentSlice+1 : currentSlice-1;
 	
 	switch (view)
 	{
 	case 'x':
-		var currentSlice = losp_slices._Xslice._currentSlice;
-		newSlice = (up) ? currentSlice+1 : currentSlice-1;
 		if ( newSlice<0 || newSlice>=x_width ) {
 			window.console.log("Error: Slice out of range");
 			return null; //error
-		}
-		
-		if (sliceNum != 0) {
-			newSlice = sliceNum;
-		}
-		
-		if (newSlice > labelmap._slicesX._children.length - 1) {
-			return null;
 		}
 		
 		//change X plane (easy)
@@ -954,6 +964,9 @@ function losp_copy (up, view, labelmap, sliceNum) {
 		
 		for(var y=0; y<y_width; y++) {
 		for(var z=0; z<z_width; z++) {
+			//change labelmap._image
+			labelmap._image[z][y][newSlice] = labelmap._image[z][y][currentSlice];
+			
 			//change Y plane (hard)
 			labelmap._slicesY._children[y]._texture._rawData[(z*x_width+newSlice)*4] =		labelmap._slicesY._children[y]._texture._rawData[(z*x_width+currentSlice)*4];
 			labelmap._slicesY._children[y]._texture._rawData[(z*x_width+newSlice)*4+1] =	labelmap._slicesY._children[y]._texture._rawData[(z*x_width+currentSlice)*4+1];
@@ -968,19 +981,9 @@ function losp_copy (up, view, labelmap, sliceNum) {
 		}}		
 		break;
 	case 'y':
-		var currentSlice = losp_slices._Yslice._currentSlice;
-		newSlice = (up) ? currentSlice+1 : currentSlice-1;
 		if ( newSlice<0 || newSlice>=y_width ) {
 			window.console.log("Error: Slice out of range");
 			return null; //error
-		}
-		
-		if (sliceNum != 0) {
-			newSlice = sliceNum;
-		}
-		
-		if (newSlice > labelmap._slicesX._children.length - 1) {
-			return null;
 		}
 		
 		//change Y plane (easy)
@@ -988,6 +991,9 @@ function losp_copy (up, view, labelmap, sliceNum) {
 		
 		for(var x=0; x<x_width; x++) {
 		for(var z=0; z<z_width; z++) {
+			//change labelmap._image
+			labelmap._image[z][newSlice][x] = labelmap._image[z][currentSlice][x];
+			
 			//change X plane (hard)
 			labelmap._slicesX._children[x]._texture._rawData[(z*y_width+newSlice)*4] =		labelmap._slicesX._children[x]._texture._rawData[(z*y_width+currentSlice)*4];
 			labelmap._slicesX._children[x]._texture._rawData[(z*y_width+newSlice)*4+1] =	labelmap._slicesX._children[x]._texture._rawData[(z*y_width+currentSlice)*4+1];
@@ -1002,19 +1008,9 @@ function losp_copy (up, view, labelmap, sliceNum) {
 		}}
 		break;
 	case 'z':
-		var currentSlice = losp_slices._Zslice._currentSlice;
-		newSlice = (up) ? currentSlice+1 : currentSlice-1;
 		if ( newSlice<0 || newSlice>=z_width ) {
 			window.console.log("Error: Slice out of range");
 			return null; //error
-		}
-		
-		if (sliceNum != 0) {
-			newSlice = sliceNum;
-		}
-		
-		if (newSlice > labelmap._slicesX._children.length - 1) {
-			return null;
 		}
 		
 		//change Z plane (easy)
@@ -1022,6 +1018,9 @@ function losp_copy (up, view, labelmap, sliceNum) {
 		
 		for(var x=0; x<x_width; x++) {
 		for(var y=0; y<y_width; y++) {
+			//change labelmap._image
+			labelmap._image[newSlice][y][x] = labelmap._image[currentSlice][y][x];
+			
 			//change X plane (hard)
 			labelmap._slicesX._children[x]._texture._rawData[(newSlice*y_width+y)*4] =		labelmap._slicesX._children[x]._texture._rawData[(currentSlice*y_width+y)*4];
 			labelmap._slicesX._children[x]._texture._rawData[(newSlice*y_width+y)*4+1] =	labelmap._slicesX._children[x]._texture._rawData[(currentSlice*y_width+y)*4+1];

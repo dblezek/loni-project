@@ -50,7 +50,7 @@ goog.debug.Trace_ = function() {
    * @type {goog.structs.Map}
    * @private
    */
-  this.outstandingEvents_ = new goog.structs.Map();
+  //this.outstandingEvents_ = new goog.structs.Map();
 
   /**
    * Start time of the event trace
@@ -86,7 +86,7 @@ goog.debug.Trace_ = function() {
    * @type {goog.structs.Map}
    * @private
    */
-  this.stats_ = new goog.structs.Map();
+  //this.stats_ = new goog.structs.Map();
 
   /**
    * Total number of traces created in the trace.
