@@ -182,7 +182,7 @@ function setupUi() {
 	losp_slices._brush._size = selectedView;
 
 	// Initialize undo stack
- 	losp_addUndoRedo('U', volume._labelmap);
+ 	//losp_addUndoRedo('U', volume._labelmap);
  	
 	// Initialize labelmap color to 0
 	initializeLabelBlank();
@@ -389,14 +389,8 @@ function toggleUndoOption() {
 	if (!volume) {
 		return;
 	}
-
-	// Need to call function twice if boolean true
-	if (losp_slices._undoRedo._first) {
-		losp_performUndoRedo('U', volume._labelmap);
-		losp_slices._undoRedo._first = false;
-	}
 	
-	losp_performUndoRedo('U', volume._labelmap);
+	losp_performUndoRedo(true, volume._labelmap);
 }
 
 function toggleRedoOption() {
@@ -405,8 +399,7 @@ function toggleRedoOption() {
 		return;
 	}
 
-	losp_performUndoRedo('R', volume._labelmap);
-	losp_slices._undoRedo._first = false;
+	losp_performUndoRedo(false, volume._labelmap);
 }
 
 // function colorOption(hex, rgba) {
@@ -434,6 +427,25 @@ function toggleClobberOption() {
 
 }
 
+/*
+ * Whenever 2d or 3d fill is on, clobber should
+ * be enforced on
+ */
+function forceClobber(on) {
+	
+	if (on) {
+		losp_slices._brush._clobberChecked = $('#clobberOption').prop('checked');
+		$('#clobberOption').prop('checked', true);
+		losp_slices._brush._clobber = true;
+		document.getElementById('clobberOption').disabled = true;
+	} else {
+		$('#clobberOption').prop('checked', losp_slices._brush._clobberChecked);
+		losp_slices._brush._clobber = losp_slices._brush._clobberChecked;
+		document.getElementById('clobberOption').disabled = false;
+	}
+	
+}
+
 function toggle2dBucketOption() {
 
 	if (!volume) {
@@ -445,10 +457,12 @@ function toggle2dBucketOption() {
 		//document.body.style.cursor = "url('../gfx/paint.png'), default";
 		losp_slices._brush._mode = 2;
 		document.getElementById('3dBucketOption').disabled = true;
+		forceClobber(true);
 	} else {
 		//document.body.style.cursor = 'default';
 		losp_slices._brush._mode = 1;
 		document.getElementById('3dBucketOption').disabled = false;
+		forceClobber(false);
 	}
 
 }
@@ -464,10 +478,12 @@ function toggle3dBucketOption() {
 		//document.body.style.cursor = "url('../gfx/paint.png'), default";
 		
 		document.getElementById('2dBucketOption').disabled = true;
+		forceClobber(true);
 	} else {
 		//document.body.style.cursor = 'default';
 		
 		document.getElementById('2dBucketOption').disabled = false;
+		forceClobber(false);
 	}
 
 }

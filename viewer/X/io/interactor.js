@@ -412,8 +412,6 @@ X.interactor.prototype.onMouseDown = function(left, middle, right) {
  * @protected
  */
 X.interactor.prototype.onMouseUp_ = function(event) {
-	
-	 
 
   if (event.button == goog.events.BrowserEvent.MouseButton.LEFT) {
     
@@ -482,13 +480,14 @@ X.interactor.prototype.__defineGetter__('mousePosition', function() {
  * @param {boolean} right TRUE if the right button triggered this event.
  */
 X.interactor.prototype.onMouseUp = function(left, middle, right) {
-	
+
 	// For undo/redo function
-	losp_slices._undoRedo._first = true;
 	while (losp_slices._undoRedo._redo.pop() != null);
-	losp_addUndoRedo('U', volume._labelmap);
+	losp_addUndoRedo(true, volume._labelmap); // Add to undo
 	
-	volume.labelmap.modified();
+	volume.labelmap.modified(); // update 3d view
+	
+	losp_updateCurrent(volume._labelmap); // Update current state
 };
 
 
@@ -569,15 +568,15 @@ X.interactor.prototype.onMouseMove = function(event) {
 	this._size = 1;
 	this._colorid = 3; //blue
 	this._clobber = true;
+	this._clobberChecked = true;
 	this._mode = 1; //1=draw, 2=2D fill, 3=3D fill
 	this._eraser = false; // If eraser in use
 }
 
 function Losp_UndoRedo() {
+	this._current = new Losp_Labelundo(); // To keep track of current state
 	this._undo = new Array();
 	this._redo = new Array();
-	this._first = true; // Determines whether undo needs to be executed twice (hack)
-						// True means needs hack
 }
 
 //holds undo and slice data
@@ -592,7 +591,7 @@ function Losp_UndoRedo() {
  
  
   //global var used to give slice data to this part of the code from renderer2D.js
- var losp_slices = new Losp_Slices();
+  var losp_slices = new Losp_Slices();
  
  //changes the given pixel in the 1D "_rawData" arrays
  function losp_2Dpixfill (rawData, index, red, green, blue, trans) {
@@ -602,27 +601,88 @@ function Losp_UndoRedo() {
 	rawData[index+3] = trans;
 }
 
-// type = R for redo or U for undo
-function losp_addUndoRedo(type, labelmap) {
+// Update the current image
+function losp_updateCurrent(labelmap) {
+	
+	var current = losp_slices._undoRedo._current;
+	
+	var x_width = labelmap._dimensions[0];
+	var y_width = labelmap._dimensions[1];
+	var z_width = labelmap._dimensions[2];
+	
+	var tmp_arr = new Array(z_width);
+	for(var d=0; d<z_width; d++) {
+		tmp_arr[d] = new Array(y_width);
+		for(var e=0; e<y_width; e++) {
+			tmp_arr[d][e] = new Array(x_width);
+			for(var f=0; f<x_width; f++) {
+				tmp_arr[d][e][f] = labelmap._image[d][e][f];
+	}}}
+	current._image = tmp_arr;
+	
+	if (!current._rawDataX)
+		current._rawDataX = new Array();
+	if (!current._rawDataY)
+		current._rawDataY = new Array();
+	if (!current._rawDataZ)
+		current._rawDataZ = new Array();
+	
+	var i;
+	for (i=0; i<x_width; i++)
+		current._rawDataX[i] = new Uint8Array(labelmap._slicesX._children[i]._texture._rawData);
+	for (i=0; i<y_width; i++)
+		current._rawDataY[i] = new Uint8Array(labelmap._slicesY._children[i]._texture._rawData);
+	for (i=0; i<z_width; i++)
+		current._rawDataZ[i] = new Uint8Array(labelmap._slicesZ._children[i]._texture._rawData);
+		
+}
+
+// true = undo, false = redo
+function losp_addUndoRedo(undo, labelmap) {
+	
+	var current = losp_slices._undoRedo._current;
+	
+	var currentImage = undo ? losp_slices._undoRedo._current._image
+		: labelmap._image;
 	
 	var add = new Losp_Labelundo();
 	
-	add._image = labelmap._image;
 	add._rawDataX = new Array();
 	add._rawDataY = new Array();
 	add._rawDataZ = new Array();
 	var x_width = labelmap._dimensions[0];
 	var y_width = labelmap._dimensions[1];
 	var z_width = labelmap._dimensions[2];
-	var i;
-	for (i=0; i<x_width; i++)
-		add._rawDataX[i] = new Uint8Array(labelmap._slicesX._children[i]._texture._rawData);
-	for (i=0; i<y_width; i++)
-		add._rawDataY[i] = new Uint8Array(labelmap._slicesY._children[i]._texture._rawData);
-	for (i=0; i<z_width; i++)
-		add._rawDataZ[i] = new Uint8Array(labelmap._slicesZ._children[i]._texture._rawData);
+	
+	var tmp_arr = new Array(z_width);
+	for(var d=0; d<z_width; d++) {
+		tmp_arr[d] = new Array(y_width);
+		for(var e=0; e<y_width; e++) {
+			tmp_arr[d][e] = new Array(x_width);
+			for(var f=0; f<x_width; f++) {
+				tmp_arr[d][e][f] = currentImage[d][e][f];
+	}}}
+	add._image = tmp_arr;
+	
+	if (undo) {
+		var i;
+		for (i=0; i<x_width; i++)
+			add._rawDataX[i] = current._rawDataX[i];
+		for (i=0; i<y_width; i++)
+			add._rawDataY[i] = current._rawDataY[i];
+		for (i=0; i<z_width; i++)
+			add._rawDataZ[i] = current._rawDataZ[i];
+	} else {
+		var i;
+		for (i=0; i<x_width; i++)
+			add._rawDataX[i] = new Uint8Array(labelmap._slicesX._children[i]._texture._rawData);
+		for (i=0; i<y_width; i++)
+			add._rawDataY[i] = new Uint8Array(labelmap._slicesY._children[i]._texture._rawData);
+		for (i=0; i<z_width; i++)
+			add._rawDataZ[i] = new Uint8Array(labelmap._slicesZ._children[i]._texture._rawData);
+	}
 		
-	if (type == 'U') {
+	if (undo) {
 		losp_slices._undoRedo._undo.push(add);
 	} else {
 		losp_slices._undoRedo._redo.push(add);
@@ -630,25 +690,25 @@ function losp_addUndoRedo(type, labelmap) {
 	
 }
 
-// type = R for redo or U for undo
-function losp_performUndoRedo(type, labelmap) {
-	
+// true = undo, false = redo
+function losp_performUndoRedo(undo, labelmap) {
+
 	var saveArray = null;
 	
-	if (type == 'U') {
+	if (undo) {
 		if (losp_slices._undoRedo._undo.length < 1) {
 			return;
 		}
 		
-		losp_addUndoRedo('R', labelmap);
+		losp_addUndoRedo(false, labelmap);
 		saveArray = losp_slices._undoRedo._undo.pop();
 	} else {
-		if (losp_slices._undoRedo._redo.length < 2) {
+		if (losp_slices._undoRedo._redo.length < 1) {
 			// Becuase last redo redundant
 			return;
 		}
 		
-		losp_addUndoRedo('U', labelmap);
+		losp_addUndoRedo(true, labelmap);
 		saveArray = losp_slices._undoRedo._redo.pop();
 	}
 	
@@ -664,8 +724,21 @@ function losp_performUndoRedo(type, labelmap) {
 	for (i=0; i<z_width; i++)
 		labelmap._slicesZ._children[i]._texture._rawData = new Uint8Array(saveArray._rawDataZ[i]);
 		
+	// Restore internal image array
+	var tmp_arr = new Array(z_width);
+	for(var d=0; d<z_width; d++) {
+		tmp_arr[d] = new Array(y_width);
+		for(var e=0; e<y_width; e++) {
+			tmp_arr[d][e] = new Array(x_width);
+			for(var f=0; f<x_width; f++) {
+				tmp_arr[d][e][f] = saveArray._image[d][e][f];
+	}}}
+	labelmap._image = tmp_arr;	
+	
 	// To change 3D rendering
 	volume.labelmap.modified();
+	
+	losp_updateCurrent(volume._labelmap);
 
 }
 
@@ -723,8 +796,9 @@ function initializeLabelBlank() {
  	
  	volume.labelmap.modified();
  	
- 	while (losp_slices._undoRedo._undo.pop() != null);
- 	losp_addUndoRedo('U', volume._labelmap);
+ 	//while (losp_slices._undoRedo._undo.pop() != null);
+ 	//losp_addUndoRedo('U', volume._labelmap);
+ 	losp_updateCurrent(volume._labelmap);
 }
 
 // // saves the current data so it can be restored if undo is called
@@ -1088,7 +1162,7 @@ function losp_2D_fill(x, y, z, view, id, labelmap) {
 	var queue=new Queue();
 	
 	queue.enqueue(pos);
-	window.console.log(queue.getLength());
+	//window.console.log(queue.getLength());
 	while(!queue.isEmpty())
 	{
 		var curr=queue.dequeue();
