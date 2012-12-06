@@ -592,6 +592,9 @@ function Losp_UndoRedo() {
  
   //global var used to give slice data to this part of the code from renderer2D.js
   var losp_slices = new Losp_Slices();
+  
+  // global var for stack size limit
+  var maxStackSize = 20;
  
  //changes the given pixel in the 1D "_rawData" arrays
  function losp_2Dpixfill (rawData, index, red, green, blue, trans) {
@@ -683,11 +686,31 @@ function losp_addUndoRedo(undo, labelmap) {
 	}
 		
 	if (undo) {
-		losp_slices._undoRedo._undo.push(add);
+		//losp_slices._undoRedo._undo.push(add);
+		addToStack(losp_slices._undoRedo._undo, add);
 	} else {
-		losp_slices._undoRedo._redo.push(add);
+		//losp_slices._undoRedo._redo.push(add);
+		addToStack(losp_slices._undoRedo._redo, add);
 	}
 	
+}
+
+function addToStack(checkArray, add) {
+	
+	var newArray = checkArray;
+	
+	if (checkArray.length >= maxStackSize) {
+		
+		newArray = new Array();
+		
+		for (var i = 1; i < checkArray.length; i++) {
+			newArray[i-1] = checkArray[i];
+		}
+		
+	}
+	
+	newArray.push(add);
+	checkArray = newArray;
 }
 
 // true = undo, false = redo
@@ -1111,6 +1134,11 @@ function losp_copy (up, view, labelmap, sliceNum) {
 	default:
 		window.console.log('Error: invalid view.');
 		break;
+	}
+	
+	if (newSlice != null) {
+		// To change 3D rendering
+		volume.labelmap.modified();
 	}
 	
 	return newSlice;
