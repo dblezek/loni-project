@@ -576,6 +576,13 @@ function saveFile() {
 		return;
 	}
 	
+//	//Data is located in 4 places. It should always be consistent. If it isn't, there is a flaw in the program that needs to be de-bugged
+//	if (!losp_checkimage (volume._labelmap)) {
+//		jQuery("#saveFileInfo").html("ERROR: Data Not Consistent, please report this program error");
+//		return;
+//	}
+	
+	
 	jQuery("#saveFileButton").attr("disabled", "disabled");
 	jQuery("#saveFileInfo").html("Preparing file...<img src=\"gfx/ajax-loader.gif\">");
 	
