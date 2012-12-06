@@ -1021,7 +1021,7 @@ function losp_copy (up, view, labelmap, sliceNum) {
 	
 	var newSlice = null;
 	if (sliceNum != 0)
-		newSlice = sliceNum;
+		newSlice = parseInt(sliceNum);
 	else
 		newSlice = (up) ? currentSlice+1 : currentSlice-1;
 	
@@ -1264,69 +1264,6 @@ function losp_2D_fill(x, y, z, view, id, labelmap) {
 		}
 		//window.console.log(queue.getLength());
 	}
-	
-/*	
-	//find color in 4 sources, confirm 3 rawData
-	var Xred   = labelmap._slicesX._children[x]._texture._rawData[(z*y_width+y)*4];
-	var Xgreen = labelmap._slicesX._children[x]._texture._rawData[(z*y_width+y)*4+1];
-	var Xblue  = labelmap._slicesX._children[x]._texture._rawData[(z*y_width+y)*4+2];
-	var Xtrans = labelmap._slicesX._children[x]._texture._rawData[(z*y_width+y)*4+3];
-	
-	var Yred   = labelmap._slicesY._children[y]._texture._rawData[(z*x_width+x)*4];
-	var Ygreen = labelmap._slicesY._children[y]._texture._rawData[(z*x_width+x)*4+1];
-	var Yblue  = labelmap._slicesY._children[y]._texture._rawData[(z*x_width+x)*4+2];
-	var Ytrans = labelmap._slicesY._children[y]._texture._rawData[(z*x_width+x)*4+3];
-	
-	var Zred   = labelmap._slicesZ._children[z]._texture._rawData[(y*x_width+x)*4];
-	var Zgreen = labelmap._slicesZ._children[z]._texture._rawData[(y*x_width+x)*4+1];
-	var Zblue  = labelmap._slicesZ._children[z]._texture._rawData[(y*x_width+x)*4+2];
-	var Ztrans = labelmap._slicesZ._children[z]._texture._rawData[(y*x_width+x)*4+3];
-	
-	var imageId = labelmap._image[z][y][x];
-	var imagecolors = labelmap._colortable._map.get(imageId);
-	var Ired =   imagecolors[1]*255.0;
-	var Igreen = imagecolors[2]*255.0;
-	var Iblue =  imagecolors[3]*255.0;
-	var Itrans = imagecolors[4]*255.0;
-	
-	//if (! (losp_checkequal(Ired, Xred, Yred, Zred) && losp_checkequal(Igreen, Xgreen, Ygreen, Zgreen) && losp_checkequal(Iblue, Xblue, Yblue, Zblue) && losp_checkequal(Itrans, Xtrans, Ytrans, Ztrans) ) ) {
-	if (! (losp_checkequal(Xred, Xred, Yred, Zred) && losp_checkequal(Xgreen, Xgreen, Ygreen, Zgreen) && losp_checkequal(Xblue, Xblue, Yblue, Zblue) && losp_checkequal(Xtrans, Xtrans, Ytrans, Ztrans) ) ) {
-		window.console.log("Error: color inconsitency");
-		return -1; //error
-	}
-	
-	//if pixel is already colored, end of line
-	if (red==Xred && green==Xgreen && blue==Xblue && trans==Xtrans)
-		return; //dead end
-	
-	//change pixel
-	losp_change_pixel(x, y, z, id, labelmap);
-	
-	//call on all 4 adjacent pixels
-	switch (view)
-	{
-	case 'x':
-		losp_2D_fill(x, y+1, z, view, id, labelmap);
-		losp_2D_fill(x, y-1, z, view, id, labelmap);
-		losp_2D_fill(x, y, z+1, view, id, labelmap);
-		losp_2D_fill(x, y, z-1, view, id, labelmap);
-		break;
-	case 'y':
-		losp_2D_fill(x+1, y, z, view, id, labelmap);
-		losp_2D_fill(x-1, y, z, view, id, labelmap);
-		losp_2D_fill(x, y, z+1, view, id, labelmap);
-		losp_2D_fill(x, y, z-1, view, id, labelmap);
-		break;
-	case 'z':
-		losp_2D_fill(x, y+1, z, view, id, labelmap);
-		losp_2D_fill(x, y-1, z, view, id, labelmap);
-		losp_2D_fill(x+1, y, z, view, id, labelmap);
-		losp_2D_fill(x-1, y, z, view, id, labelmap);
-		break;
-	default:
-		window.console.log('Error: invalid view.');
-	}
-*/
 }
 
 function losp_3D_fill(x, y, z, view, id, labelmap) {
@@ -1524,11 +1461,12 @@ function losp_checkimage (labelmap, percent) {
 		//this test does not look at labelmap://if (! (losp_checkequal(Xred, Xred, Yred, Zred) && losp_checkequal(Xgreen, Xgreen, Ygreen, Zgreen) && losp_checkequal(Xblue, Xblue, Yblue, Zblue) && losp_checkequal(Xtrans, Xtrans, Ytrans, Ztrans) ) ) {
 		if (! (losp_checkequal(Ired, Xred, Yred, Zred) && losp_checkequal(Igreen, Xgreen, Ygreen, Zgreen) && losp_checkequal(Iblue, Xblue, Yblue, Zblue) && losp_checkequal(Itrans, Xtrans, Ytrans, Ztrans) ) ) {
 			window.console.log("INCONSISTENCY FOUND: ("+x+", "+y+", "+z+")");
-			return;
+			return false;
 		}
 		
 	}}}
 	window.console.log("check complete: data consistent");
+	return true;
 }
 
 //the main function call, gets called in onMouseMovementInside(drag=true) AND onMouseUp(drag=false)
