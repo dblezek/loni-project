@@ -172,9 +172,9 @@ function setupUi() {
 
 
 	// Set up slice number
-	document.getElementById('sliceXText').innerHTML = "Sagittal (Yellow) Slide Number: " + Math.floor(jQuery('#yellow_slider').slider("option", "value"));
-	document.getElementById('sliceYText').innerHTML = "Coronal (Red) Slide Number: " + Math.floor(jQuery('#red_slider').slider("option", "value"));
-	document.getElementById('sliceZText').innerHTML = "Axial (Green) Slide Number: " + Math.floor(jQuery('#green_slider').slider("option", "value"));
+	document.getElementById('sliceXText').innerHTML = "Sagittal slice number: " + Math.floor(jQuery('#yellow_slider').slider("option", "value"));
+	document.getElementById('sliceYText').innerHTML = "Coronal slice number: " + Math.floor(jQuery('#red_slider').slider("option", "value"));
+	document.getElementById('sliceZText').innerHTML = "Axial slice number: " + Math.floor(jQuery('#green_slider').slider("option", "value"));
 	
 	// Set initial paint brush size
 	var e = document.getElementById('paintBrushSize');
@@ -245,7 +245,7 @@ function volumeslicingX(event, ui) {
       .floor(jQuery('#yellow_slider').slider("option", "value"));
   
   // For showing current slide number
-  document.getElementById('sliceXText').innerHTML = "Sagittal (Yellow) Slide Number: " 
+  document.getElementById('sliceXText').innerHTML = "Sagittal slice number: " 
   	+ volume.indexX;
   	
 }
@@ -259,7 +259,7 @@ function volumeslicingY(event, ui) {
   volume.indexY = Math.floor(jQuery('#red_slider').slider("option", "value"));
   
   // For showing current slide number
-  document.getElementById('sliceYText').innerHTML = "Coronal (Red) Slide Number: " 
+  document.getElementById('sliceYText').innerHTML = "Coronal slice number: " 
   	+ volume.indexY;
 }
 
@@ -272,7 +272,7 @@ function volumeslicingZ(event, ui) {
   volume.indexZ = Math.floor(jQuery('#green_slider').slider("option", "value"));
   
   // For showing current slide number
-  document.getElementById('sliceZText').innerHTML = "Axial (Green) Slide Number: " 
+  document.getElementById('sliceZText').innerHTML = "Axial slice number: " 
   	+ volume.indexZ;
 }
 
@@ -615,7 +615,7 @@ function changeSliceOption(slice, prev) {
 			volume.indexX = Math.floor(changeSlice);
 			jQuery("#yellow_slider").slider("option", "value", volume.indexX);
 			// For showing current slide number
-		 	document.getElementById('sliceXText').innerHTML = "Sagittal (Yellow) Slide Number: " 
+		 	document.getElementById('sliceXText').innerHTML = "Sagittal slice number: " 
 		  		+ volume.indexX;
 			break;
 		case 'Y':
@@ -627,7 +627,7 @@ function changeSliceOption(slice, prev) {
 			volume.indexY = Math.floor(changeSlice);
 			jQuery("#red_slider").slider("option", "value", volume.indexY);
 			// For showing current slide number
-		 	document.getElementById('sliceYText').innerHTML = "Coronal (Red) Slide Number: " 
+		 	document.getElementById('sliceYText').innerHTML = "Coronal slice number: " 
 		  		+ volume.indexY;
 			break;
 		case 'Z':
@@ -639,7 +639,7 @@ function changeSliceOption(slice, prev) {
 			volume.indexZ = Math.floor(changeSlice);
 			jQuery("#green_slider").slider("option", "value", volume.indexZ);
 			// For showing current slide number
-		 	document.getElementById('sliceZText').innerHTML = "Axial (Green) Slide Number: " 
+		 	document.getElementById('sliceZText').innerHTML = "Axial slice number: " 
 		  		+ volume.indexZ;
 			break;
 		default:

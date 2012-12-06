@@ -948,7 +948,7 @@ function losp_change_pixel(x, y, z, id, labelmap) {
 	}		
 	
 	//check for clobber
-	if (!losp_slices._brush._clobber && volume.labelmap._image[z][y][x]!=0)
+	if (!losp_slices._brush._clobber && volume.labelmap._image[z][y][x]!=0 && !losp_slices._brush._eraser)
 		return; //pixel not to be changed due to clobber
 	
 	//window.console.log("XYZ: "+x+","+y+","+z+" changed to " + id);
