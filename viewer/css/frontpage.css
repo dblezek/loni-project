@@ -89,19 +89,19 @@ input.matrix {
 }
 
 .examples {
-	top: 0px;
+	top: 5px;
 	right: 100px;
 	width: 415px;
-	height: 200px;
+	height: 18px;
 	margin-left: auto;
 	margin-right: auto;
 }
 
 .examples div {
-	background-color: #000;
+	background-color: #f5f5f5;
 	margin-right: 3px;
-	color: #fff;
-	padding: 10px;
+	color: #000;
+	padding: 0px;
 }
 
 .viewexample {
@@ -111,5 +111,11 @@ input.matrix {
 }
 
 .selectexample {
-	border-top:medium solid #3A87AD;
+	display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-unit{
+	text-align:center;
 }
